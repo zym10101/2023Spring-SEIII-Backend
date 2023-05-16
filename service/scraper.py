@@ -120,7 +120,8 @@ class GitHubScraper(ABC):
 
 class GitHubIssueScraper(GitHubScraper):
     def __init__(self, access_token=None, issue_save_strategy=CsvSaveStrategy()):
-        self.access_token = access_token
+        if access_token != "None":
+            self.access_token = access_token
         self.issue_save_strategy = issue_save_strategy
         self.url_template = 'https://api.github.com/repos/{}/issues'
         self.c = Issue
@@ -137,5 +138,5 @@ class GitHubIssueCommentScraper(GitHubScraper):
 if __name__ == '__main__':
     s = GitHubIssueScraper()
     # s = GitHubIssueScraper(issue_save_strategy=JsonSaveStrategy())
-    iss = s.get_issue(per_page=2)
-    s.save_issue(iss)
+    iss = s.get(per_page=2)
+    s.save(iss)

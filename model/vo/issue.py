@@ -28,7 +28,7 @@ class Label(db.Model):
     name = db.Column(db.String(255), nullable=False)
     color = db.Column(db.String(64), nullable=False)
     default = db.Column(db.Boolean, nullable=False)
-    description = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=True)
 
 
 # 表示该 GitHub issue 的作者的相关信息
