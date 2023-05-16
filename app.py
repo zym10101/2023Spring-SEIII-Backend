@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
@@ -61,6 +61,31 @@ with app.app_context():
     #     rs = conn.execute("select * from tmp")
     #     print(rs.fetchone())
 
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/user/info",methods=["GET", "POST"])
+def user_info():
+    """
+    获取当前用户信息
+    :return:
+    """
+    token = request.headers.get("token")
+    if token == "666666":
+        return jsonify({
+            "code": 0,
+            "data": {
+                "id": "1",
+                "userName": "admin",
+                "realName": "张三",
+                "userType": 1
+            }
+        })
+    return jsonify({
+        "code": 99990403,
+        "msg": "token不存在或已过期"
+    })
 
 @app.route("/resp/add-single")
 def resp_add_single():
@@ -150,4 +175,4 @@ def issue_get_and_save_csv():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port='5000')
+    app.run(debug=True, host='127.0.0.1',port='5000')
