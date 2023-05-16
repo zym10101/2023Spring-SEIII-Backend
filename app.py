@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
-from model.vo.issue import db, User, Issue
+from model.vo.issue import db, User, Issue, Label
 from service.scraper import CsvSaveStrategy, JsonSaveStrategy, MysqlSaveStrategy, GitHubIssueScraper
 import json
 
@@ -18,6 +18,7 @@ DB_PORT = os.environ.get('DB_PORT')
 DB_USERNAME = os.environ.get('DB_USERNAME')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DB_DATABASE = os.environ.get('DB_DATABASE')
+ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
 app.config['SQLALCHEMY_DATABASE_URI'] \
     = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOSTNAME}:{DB_PORT}/{DB_DATABASE}?charset=utf8"
 
@@ -61,11 +62,13 @@ with app.app_context():
     #     rs = conn.execute("select * from tmp")
     #     print(rs.fetchone())
 
+
 @app.route("/")
 def index():
     return render_template("index.html")
 
-@app.route("/user/info",methods=["GET", "POST"])
+
+@app.route("/user/info", methods=["GET", "POST"])
 def user_info():
     """
     获取当前用户信息
@@ -87,24 +90,35 @@ def user_info():
         "msg": "token不存在或已过期"
     })
 
+
 @app.route("/resp/add-single")
 def resp_add_single():
-    # 1.创建 User ORM对象
+    # 1.创建 User\Label ORM对象
     user_ = User(resp_dict_1['user'])
-    # 2.将ORM对象添加到db.session中
-    db.session.add(user_)
-    # 3.创建 issue ORM对象
+    labels_ = []
+    for each in resp_dict_1['labels']:
+        labels_.append(Label(each))
+
+    # 2.创建 issue ORM对象
     issue_ = Issue(resp_dict_1)
-    print(issue_.user)
+    issue_.labels = labels_
+    print(issue_.labels)
+
+    # 3.将ORM对象添加到db.session中
+    db.session.merge(user_)
+    db.session.merge(issue_)
+
     # 4.commit操作
     db.session.commit()
+
     return "用户创建成功!"
 
 
 # 请求：http://127.0.0.1:5000/issue/get-and-save-db
 @app.route("/issue/get-and-save-db")
 def issue_get_and_save_db():
-    s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db))
+    s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db),
+                           access_token=ACCESS_TOKEN)
     iss = s.get_issue(per_page=2)
     s.save_issue(iss)
     return "数据保存到数据库成功!"
@@ -175,4 +189,4 @@ def issue_get_and_save_csv():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1',port='5000')
+    app.run(debug=True, host='127.0.0.1', port='5000')

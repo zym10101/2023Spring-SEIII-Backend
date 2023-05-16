@@ -1,7 +1,7 @@
 import requests
 import json
 from abc import ABC, abstractmethod
-from model.vo.issue import db, User, Issue
+from model.vo.issue import User, Issue, Label
 
 
 class IssueSaveStrategy(ABC):
@@ -60,15 +60,22 @@ class MysqlSaveStrategy(IssueSaveStrategy):
 
     def save(self, issues):
         for issue in issues:
-            # 1.创建 User ORM对象
+            # 1.创建 User\Label ORM对象
             user_ = User(issue['user'])
-            # 2.将ORM对象添加到db.session中
-            self.db.session.merge(user_)
-            # 3.创建 issue ORM对象
+            labels_ = []
+            for label_ in issue['labels']:
+                labels_.append(Label(label_))
+
+            # 2.创建 issue ORM对象
             issue_ = Issue(issue)
-            # 4.将ORM对象添加到db.session中
-            self.db.session.add(issue_)
-        # 5.commit操作
+            issue_.labels = labels_
+            print(issue_.labels)
+
+            # 3.将ORM对象添加到db.session中
+            self.db.session.merge(user_)
+            self.db.session.merge(issue_)
+
+        # 4.commit操作
         self.db.session.commit()
 
 

@@ -3,6 +3,33 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
+# 解决 issue 与 label 的多对多关系
+issue_label = db.Table('issue_label',
+                       db.Column('issue_id', db.BigInteger, db.ForeignKey('issue.id'), primary_key=True),
+                       db.Column('label_id', db.BigInteger, db.ForeignKey('label.id'), primary_key=True)
+                       )
+
+
+# 表示 GitHub issue 的标签
+class Label(db.Model):
+    def __init__(self, init_dict):
+        self.id = init_dict['id']
+        self.node_id = init_dict['node_id']
+        self.url = init_dict['url']
+        self.name = init_dict['name']
+        self.color = init_dict['color']
+        self.default = init_dict['default']
+        self.description = init_dict['description']
+
+    __tablename__ = "label"
+    id = db.Column(db.BigInteger, primary_key=True)
+    node_id = db.Column(db.String(255), nullable=False)
+    url = db.Column(db.Text, nullable=False)
+    name = db.Column(db.String(255), nullable=False)
+    color = db.Column(db.String(64), nullable=False)
+    default = db.Column(db.Boolean, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+
 
 # 表示该 GitHub issue 的作者的相关信息
 class User(db.Model):
@@ -65,47 +92,6 @@ class User(db.Model):
     site_admin = db.Column(db.Text, nullable=False)
 
 
-# # 记录了该问题/issue收到的各种反应/表情符号的数量和相关信息
-# class Reactions(db.Model):
-#     def __init__(self, reactions_dict):
-#         self.url = reactions_dict['url']
-#         self.total_count = reactions_dict['total_count']
-#         self.plus_one = reactions_dict['+1']
-#         self.minus_one = reactions_dict['-1']
-#         self.laugh = reactions_dict['laugh']
-#         self.hooray = reactions_dict['hooray']
-#         self.confused = reactions_dict['confused']
-#         self.heart = reactions_dict['heart']
-#         self.rocket = reactions_dict['rocket']
-#         self.eyes = reactions_dict['eyes']
-#
-#     __tablename__ = "reactions"
-#     # 数据库中该记录索引
-#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     # issue id
-#     issue_id = db.Column(db.Integer, db.ForeignKey('issue.id'))
-#     # 该问题/issue的反应/表情符号的API地址
-#     url = db.Column(db.Text, nullable=False)
-#     # 该问题/issue所收到的反应/表情符号总数
-#     total_count = db.Column(db.Integer, nullable=False)
-#     # 点赞的数量
-#     plus_one = db.Column(db.Integer, nullable=False)
-#     # 踩的数量
-#     minus_one = db.Column(db.Integer, nullable=False)
-#     # 大笑的数量
-#     laugh = db.Column(db.Integer, nullable=False)
-#     # 庆祝的数量
-#     hooray = db.Column(db.Integer, nullable=False)
-#     # 困惑的数量
-#     confused = db.Column(db.Integer, nullable=False)
-#     # 爱心的数量
-#     heart = db.Column(db.Integer, nullable=False)
-#     # 火箭的数量
-#     rocket = db.Column(db.Integer, nullable=False)
-#     # 眼睛的数量
-#     eyes = db.Column(db.Integer, nullable=False)
-
-
 # Issue
 class Issue(db.Model):
     def __init__(self, issue_dict):
@@ -123,7 +109,7 @@ class Issue(db.Model):
         self.user_id = issue_dict['user']['id']
         self.user = User.query.get(self.user_id)
 
-        self.labels = ",".join([label['name'] for label in issue_dict['labels']])
+        # self.labels = ",".join([label['name'] for label in issue_dict['labels']])
         self.state = issue_dict['state']
         self.locked = issue_dict['locked']
         self.assignee = issue_dict['assignee']['id'] if issue_dict['assignee'] else None
@@ -136,6 +122,13 @@ class Issue(db.Model):
             'closed_at'] else None
         self.author_association = issue_dict['author_association']
         self.active_lock_reason = issue_dict['active_lock_reason']
+        self.draft = issue_dict['draft'] if 'draft' in issue_dict.keys() else None
+        if 'pull_request' in issue_dict.keys():
+            self.pull_request_url = issue_dict['pull_request']['url']
+            self.pull_request_html_url = issue_dict['pull_request']['html_url']
+            self.pull_request_diff_url = issue_dict['pull_request']['diff_url']
+            self.pull_request_patch_url = issue_dict['pull_request']['patch_url']
+            self.pull_request_merged_at = issue_dict['pull_request']['merged_at']
         self.body = issue_dict['body']
 
         # self.reactions = [Reactions(reactions_dict) for reactions_dict in issue_dict['reactions']]
@@ -157,7 +150,7 @@ class Issue(db.Model):
 
     __tablename__ = "issue"
     # 此issue的唯一标识符
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     # 此issue的URL
     url = db.Column(db.Text, nullable=False)
     # 包含此issue的存储库的URL
@@ -181,7 +174,7 @@ class Issue(db.Model):
     # 此issue的作者，关联User模型
     user = db.relationship('User', backref='issue', lazy=True)
     # 此issue的标签列表，以逗号间隔
-    labels = db.Column(db.Text, nullable=False)
+    labels = db.relationship('Label', secondary=issue_label, backref=db.backref('issues', lazy='dynamic'))
     # 此issue的状态，可以是 "open"，"closed"或其他自定义状态
     state = db.Column(db.Text, nullable=False)
     # 如果此issue已被锁定，则为true
@@ -204,6 +197,18 @@ class Issue(db.Model):
     author_association = db.Column(db.Text, nullable=False)
     # 如果此issue当前被锁定，则为锁定原因
     active_lock_reason = db.Column(db.Text, nullable=True)
+    # 问题是否处于草稿状态
+    draft = db.Column(db.Boolean, nullable=True)
+    # 拉取请求的API URL，可以使用该URL获取有关拉取请求的详细信息
+    pull_request_url = db.Column(db.Text, nullable=True)
+    # 拉取请求的HTML URL，可以使用该URL在网页浏览器中打开拉取请求
+    pull_request_html_url = db.Column(db.Text, nullable=True)
+    # 拉取请求的差异（diff）URL，可以使用该URL查看拉取请求中更改的具体差异
+    pull_request_diff_url = db.Column(db.Text, nullable=True)
+    # 拉取请求的补丁（patch）URL，可以使用该URL下载拉取请求的补丁文件
+    pull_request_patch_url = db.Column(db.Text, nullable=True)
+    # 拉取请求合并的时间戳。如果该值为null，则表示该拉取请求尚未合并
+    pull_request_merged_at = db.Column(db.Text, nullable=True)
     # 此issue的主体，即详细说明
     body = db.Column(db.Text, nullable=False)
     # # 包含此issue的各种反应的统计信息
