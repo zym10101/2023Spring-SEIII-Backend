@@ -97,23 +97,22 @@ class Issue(db.Model):
     def __init__(self, issue_dict):
         self.id = issue_dict['id']
         self.url = issue_dict['url']
+        self.html_url = issue_dict['html_url']
         self.repository_url = issue_dict['repository_url']
         self.labels_url = issue_dict['labels_url']
         self.comments_url = issue_dict['comments_url']
         self.events_url = issue_dict['events_url']
-        self.html_url = issue_dict['html_url']
-        self.node_id = issue_dict['node_id']
         self.number = issue_dict['number']
+        self.node_id = issue_dict['node_id']
         self.title = issue_dict['title']
 
         self.user_id = issue_dict['user']['id']
         self.user = User.query.get(self.user_id)
 
-        # self.labels = ",".join([label['name'] for label in issue_dict['labels']])
         self.state = issue_dict['state']
         self.locked = issue_dict['locked']
         self.assignee = issue_dict['assignee']['id'] if issue_dict['assignee'] else None
-        self.assignees = ",".join([assignee['id'] for assignee in issue_dict['assignees']])
+        self.assignees = ",".join(list(map(str, [assignee['id'] for assignee in issue_dict['assignees']])))
         self.milestone = issue_dict['milestone']['title'] if issue_dict['milestone'] else None
         self.comments = issue_dict['comments']
         self.created_at = datetime.strptime(issue_dict['created_at'], '%Y-%m-%dT%H:%M:%SZ')
@@ -122,6 +121,7 @@ class Issue(db.Model):
             'closed_at'] else None
         self.author_association = issue_dict['author_association']
         self.active_lock_reason = issue_dict['active_lock_reason']
+
         self.draft = issue_dict['draft'] if 'draft' in issue_dict.keys() else None
         if 'pull_request' in issue_dict.keys():
             self.pull_request_url = issue_dict['pull_request']['url']
@@ -129,9 +129,8 @@ class Issue(db.Model):
             self.pull_request_diff_url = issue_dict['pull_request']['diff_url']
             self.pull_request_patch_url = issue_dict['pull_request']['patch_url']
             self.pull_request_merged_at = issue_dict['pull_request']['merged_at']
-        self.body = issue_dict['body']
 
-        # self.reactions = [Reactions(reactions_dict) for reactions_dict in issue_dict['reactions']]
+        self.body = issue_dict['body']
         self.reactions_url = issue_dict['reactions']['url']
         self.reactions_total_count = issue_dict['reactions']['total_count']
         self.reactions_plus_one = issue_dict['reactions']['+1']
@@ -144,8 +143,8 @@ class Issue(db.Model):
         self.reactions_eyes = issue_dict['reactions']['eyes']
 
         self.timeline_url = issue_dict['timeline_url']
-        # self.performed_via_github_app = issue_dict['performed_via_github_app']['name'] if issue_dict[
-        #     'performed_via_github_app'] else None
+        self.performed_via_github_app = issue_dict['performed_via_github_app']['name'] if issue_dict[
+            'performed_via_github_app'] else None
         self.state_reason = issue_dict['state_reason']
 
     __tablename__ = "issue"
@@ -210,11 +209,7 @@ class Issue(db.Model):
     # 拉取请求合并的时间戳。如果该值为null，则表示该拉取请求尚未合并
     pull_request_merged_at = db.Column(db.Text, nullable=True)
     # 此issue的主体，即详细说明
-    body = db.Column(db.Text, nullable=False)
-    # # 包含此issue的各种反应的统计信息
-    # reactions_id = db.Column(db.Integer, db.ForeignKey('issue.id'))
-    # # 包含此issue的各种反应的统计信息
-    # reactions = db.relationship('Reactions', backref='issue', lazy=True)
+    body = db.Column(db.Text, nullable=True)
     # 该问题/issue的反应/表情符号的API地址
     reactions_url = db.Column(db.Text, nullable=False)
     # 该问题/issue所收到的反应/表情符号总数
@@ -241,3 +236,110 @@ class Issue(db.Model):
     performed_via_github_app = db.Column(db.Text, nullable=True)
     # 关闭此issue时提供的关闭原因（如果适用）。
     state_reason = db.Column(db.Text, nullable=True)
+
+    @staticmethod
+    def save(session, json):
+        # 1.创建 User\Label ORM对象
+        user_ = User(json['user'])
+        labels_ = []
+        for label_ in json['labels']:
+            labels_.append(Label(label_))
+
+        # 2.创建 issue ORM对象
+        issue_ = Issue(json)
+        issue_.labels = labels_
+        print(issue_.labels)
+
+        # 3.将ORM对象添加到db.session中
+        session.merge(user_)
+        session.merge(issue_)
+
+
+# IssueComment
+class IssueComment(db.Model):
+    def __init__(self, issue_dict):
+        self.id = issue_dict['id']
+        self.url = issue_dict['url']
+        self.issue_url = issue_dict['issue_url']
+        self.html_url = issue_dict['html_url']
+        self.node_id = issue_dict['node_id']
+
+        self.user_id = issue_dict['user']['id']
+        self.user = User.query.get(self.user_id)
+
+        self.created_at = datetime.strptime(issue_dict['created_at'], '%Y-%m-%dT%H:%M:%SZ')
+        self.updated_at = datetime.strptime(issue_dict['updated_at'], '%Y-%m-%dT%H:%M:%SZ')
+        self.author_association = issue_dict['author_association']
+        self.body = issue_dict['body']
+
+        self.reactions_url = issue_dict['reactions']['url']
+        self.reactions_total_count = issue_dict['reactions']['total_count']
+        self.reactions_plus_one = issue_dict['reactions']['+1']
+        self.reactions_minus_one = issue_dict['reactions']['-1']
+        self.reactions_laugh = issue_dict['reactions']['laugh']
+        self.reactions_hooray = issue_dict['reactions']['hooray']
+        self.reactions_confused = issue_dict['reactions']['confused']
+        self.reactions_heart = issue_dict['reactions']['heart']
+        self.reactions_rocket = issue_dict['reactions']['rocket']
+        self.reactions_eyes = issue_dict['reactions']['eyes']
+
+        self.performed_via_github_app = issue_dict['performed_via_github_app']['name'] if issue_dict[
+            'performed_via_github_app'] else None
+
+    __tablename__ = "issue_comment"
+    # 此issue comment的唯一标识符
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    # 此comment的URL
+    url = db.Column(db.Text, nullable=False)
+    # 以HTML格式显示此issue comment的URL
+    html_url = db.Column(db.Text, nullable=False)
+    # 此issue comment对应的issue链接
+    issue_url = db.Column(db.Text, nullable=True)
+    # 此issue comment的节点ID
+    node_id = db.Column(db.Text, nullable=False)
+    # 此issue comment的作者id
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # 此issue的作者，关联User模型
+    user = db.relationship('User', backref='issue_comment', lazy=True)
+    # 此issue comment创建的日期和时间
+    created_at = db.Column(db.DateTime, nullable=False)
+    # 此issue comment最后更新的日期和时间
+    updated_at = db.Column(db.DateTime, nullable=False)
+    # 此issue comment作者与此存储库的关联程度，例如“成员”或“拥有者”
+    author_association = db.Column(db.Text, nullable=False)
+    # 此issue comment的主体，即详细说明
+    body = db.Column(db.Text, nullable=True)
+    # 该issue comment的反应/表情符号的API地址
+    reactions_url = db.Column(db.Text, nullable=False)
+    # 该issue comment所收到的反应/表情符号总数
+    reactions_total_count = db.Column(db.Integer, nullable=False)
+    # 点赞的数量
+    reactions_plus_one = db.Column(db.Integer, nullable=False)
+    # 踩的数量
+    reactions_minus_one = db.Column(db.Integer, nullable=False)
+    # 大笑的数量
+    reactions_laugh = db.Column(db.Integer, nullable=False)
+    # 庆祝的数量
+    reactions_hooray = db.Column(db.Integer, nullable=False)
+    # 困惑的数量
+    reactions_confused = db.Column(db.Integer, nullable=False)
+    # 爱心的数量
+    reactions_heart = db.Column(db.Integer, nullable=False)
+    # 火箭的数量
+    reactions_rocket = db.Column(db.Integer, nullable=False)
+    # 眼睛的数量
+    reactions_eyes = db.Column(db.Integer, nullable=False)
+    # 如果此issue comment通过GitHub应用程序创建，则为应用程序信息。
+    performed_via_github_app = db.Column(db.Text, nullable=True)
+
+    @staticmethod
+    def save(session, json):
+        # 1.创建 User\Label ORM对象
+        user_ = User(json['user'])
+
+        # 2.创建 issue comment ORM对象
+        issue_comment_ = IssueComment(json)
+
+        # 3.将ORM对象添加到db.session中
+        session.merge(user_)
+        session.merge(issue_comment_)

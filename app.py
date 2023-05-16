@@ -2,8 +2,9 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
-from model.vo.issue import db, User, Issue, Label
-from service.scraper import CsvSaveStrategy, JsonSaveStrategy, MysqlSaveStrategy, GitHubIssueScraper
+from model.vo.issue import db, User, Issue, Label, IssueComment
+from service.scraper import CsvSaveStrategy, JsonSaveStrategy, \
+    MysqlSaveStrategy, GitHubIssueScraper, GitHubIssueCommentScraper
 import json
 
 # 使用Flask类创建一个app对象
@@ -20,7 +21,7 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DB_DATABASE = os.environ.get('DB_DATABASE')
 ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
 app.config['SQLALCHEMY_DATABASE_URI'] \
-    = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOSTNAME}:{DB_PORT}/{DB_DATABASE}?charset=utf8"
+    = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOSTNAME}:{DB_PORT}/{DB_DATABASE}?charset=utf8mb4"
 
 # 在 Flask 中，应用程序实例和扩展是分离的，这意味着你需要在应用程序和扩展之间建立连接。
 # 当创建一个 SQLAlchemy 实例时，它并不知道与哪个 Flask 应用程序关联，所以需要使用 db.init_app(app) 方法将其关联起来。
@@ -117,11 +118,21 @@ def resp_add_single():
 # 请求：http://127.0.0.1:5000/issue/get-and-save-db
 @app.route("/issue/get-and-save-db")
 def issue_get_and_save_db():
-    s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db),
+    s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
                            access_token=ACCESS_TOKEN)
-    iss = s.get_issue(per_page=2)
-    s.save_issue(iss)
-    return "数据保存到数据库成功!"
+    iss = s.get(per_page=100, end_page=50)
+    s.save(iss)
+    return "Issue数据保存到数据库成功!"
+
+
+# 请求：http://127.0.0.1:5000/issue/comments/get-and-save-db
+@app.route("/issue/comments/get-and-save-db")
+def issue_comments_get_and_save_db():
+    s = GitHubIssueCommentScraper(issue_save_strategy=MysqlSaveStrategy(db, IssueComment),
+                                  access_token=ACCESS_TOKEN)
+    iss = s.get(per_page=100, end_page=50)
+    s.save(iss)
+    return "IssueComment数据保存到数据库成功!"
 
 
 # 请求：http://127.0.0.1:5000/issue/get-and-save-csv
@@ -129,8 +140,8 @@ def issue_get_and_save_db():
 def issue_get_and_save_csv():
     path = './data/issues-tmp.csv'
     s = GitHubIssueScraper(issue_save_strategy=CsvSaveStrategy(path))
-    iss = s.get_issue(per_page=2)
-    s.save_issue(iss)
+    iss = s.get(per_page=2)
+    s.save(iss)
     return f"数据保存到csv成功! 请前往项目根目录下{path}查看"
 
 
@@ -189,4 +200,4 @@ def issue_get_and_save_csv():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port='5000')
+    app.run(debug=True, host='127.0.0.1', port=5000)
