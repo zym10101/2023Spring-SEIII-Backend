@@ -76,6 +76,7 @@ def user_info():
     :return:
     """
     token = request.headers.get("token")
+    # print(token)
     if token == "666666":
         return jsonify({
             "code": 0,

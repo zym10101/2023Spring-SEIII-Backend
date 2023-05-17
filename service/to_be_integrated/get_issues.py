@@ -1,14 +1,13 @@
 import requests
 import json
 
-
 if __name__ == '__main__':
     pageNum = 1
     url = 'https://api.github.com/repos/apache/superset/issues'
-    params = {'state': 'all','page':pageNum,'per_page':100}
+    params = {'state': 'all', 'page': pageNum, 'per_page': 100}
     headers = {'Authorization': 'token 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',
-               'Content-Type':'application/json',
-               'Accept':'application/json'}
+               'Content-Type': 'application/json',
+               'Accept': 'application/json'}
     response = requests.get(url, headers=headers, params=params)
     link_header = response.headers.get('Link')
     issuePath = './issues/'
@@ -18,7 +17,7 @@ if __name__ == '__main__':
 
     # 记录issue链接与存放路径等
     f = open('./superset_issues.csv', 'w', encoding='utf-8')
-    f.write(','.join(['title', 'body', 'labels','created_at','user','reactions']))
+    f.write(','.join(['title', 'body', 'labels', 'created_at', 'user', 'reactions']))
     f.write('\n')
 
     # 处理第一页响应
@@ -31,16 +30,19 @@ if __name__ == '__main__':
         else:
             labels = issue['labels']
 
-
-        reactions=json.dumps(issue['reactions'], indent=2).replace('\n', '').replace('\r', ' ').replace('\t', '').replace(',',';')
-        user = json.dumps(issue['user'], indent=2).replace('\n', '').replace('\r', '').replace('\t', '').replace(',',';')
+        reactions = json.dumps(issue['reactions'], indent=2).replace('\n', '').replace('\r', ' ').replace('\t',
+                                                                                                          '').replace(
+            ',', ';')
+        user = json.dumps(issue['user'], indent=2).replace('\n', '').replace('\r', '').replace('\t', '').replace(',',
+                                                                                                                 ';')
         if not issue['body']:
             issue['body'] = ''
         if not issue['title']:
             issue['title'] = ''
 
-        body = issue['body'].replace('\n', ' ').replace('\t', ' ').replace('\r', ' ').replace(',',';')
-        line = ','.join([issue['title'].replace(',',';'), body, '&'.join(labels), issue['created_at'], user, reactions])
+        body = issue['body'].replace('\n', ' ').replace('\t', ' ').replace('\r', ' ').replace(',', ';')
+        line = ','.join(
+            [issue['title'].replace(',', ';'), body, '&'.join(labels), issue['created_at'], user, reactions])
         f.write(line)
         f.write('\n')
 
@@ -67,14 +69,19 @@ if __name__ == '__main__':
                     labels = '|'.join(label['name'] for label in issue['labels']),
                 else:
                     labels = issue['labels']
-                reactions = json.dumps(issue['reactions'], indent=2).replace('\n', '').replace('\r', ' ').replace('\t', ' ').replace(',',';')
-                user = json.dumps(issue['user'], indent=2).replace('\n', '').replace('\r', ' ').replace('\t', ' ').replace(',',';')
+                reactions = json.dumps(issue['reactions'], indent=2).replace('\n', '').replace('\r', ' ').replace('\t',
+                                                                                                                  ' ').replace(
+                    ',', ';')
+                user = json.dumps(issue['user'], indent=2).replace('\n', '').replace('\r', ' ').replace('\t',
+                                                                                                        ' ').replace(
+                    ',', ';')
                 if not issue['body']:
                     issue['body'] = ''
                 if not issue['title']:
                     issue['title'] = ''
-                body = issue['body'].replace('\n', ' ').replace('\t', ' ').replace('\r', ' ').replace(',',';')
-                line = ','.join([issue['title'].replace(',',';'), body, '&'.join(labels), issue['created_at'], user, reactions])
+                body = issue['body'].replace('\n', ' ').replace('\t', ' ').replace('\r', ' ').replace(',', ';')
+                line = ','.join(
+                    [issue['title'].replace(',', ';'), body, '&'.join(labels), issue['created_at'], user, reactions])
                 f.write(line)
                 f.write('\n')
             next_page_url = None
@@ -88,4 +95,3 @@ if __name__ == '__main__':
         print('已达到最大请求次数！')
     finally:
         f.close()
-

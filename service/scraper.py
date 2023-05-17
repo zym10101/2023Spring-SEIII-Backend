@@ -120,8 +120,10 @@ class GitHubScraper(ABC):
 
 class GitHubIssueScraper(GitHubScraper):
     def __init__(self, access_token=None, issue_save_strategy=CsvSaveStrategy()):
-        if access_token != "None":
+        if access_token is not None or access_token != "":
             self.access_token = access_token
+        else:
+            self.access_token = None
         self.issue_save_strategy = issue_save_strategy
         self.url_template = 'https://api.github.com/repos/{}/issues'
         self.c = Issue

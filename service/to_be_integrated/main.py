@@ -7,7 +7,7 @@ create by syj
 if __name__ == '__main__':
     pageNum = 1
     url = 'https://api.github.com/repos/apache/superset/issues'
-    params = {'state': 'all','page':pageNum,'per_page':100}
+    params = {'state': 'all', 'page': pageNum, 'per_page': 100}
     headers = {'Accept': 'application/vnd.github.v3+json'}
     response = requests.get(url, headers=headers, params=params)
     link_header = response.headers.get('Link')
@@ -15,7 +15,6 @@ if __name__ == '__main__':
 
     # 初始化自动翻页所需变量
     next_page_url = None
-
 
     # 记录issue链接与存放路径等
     f = open('./superset.csv', 'w', encoding='utf-8')
@@ -48,7 +47,7 @@ if __name__ == '__main__':
 
     try:
         # 循环处理下一页，直到没有下一页为止
-        while pageNum<1:
+        while pageNum < 1:
             pageNum += 1
             print('正在爬取第{}页'.format(pageNum))
             response = requests.get(next_page_url, headers=headers)
@@ -56,7 +55,8 @@ if __name__ == '__main__':
 
             json_data = json.loads(response.text)
             for issue in json_data:
-                issue_details = {'title': issue['title'].replace(',', '.'), 'url': issue['html_url'], 'body': issue['body']}
+                issue_details = {'title': issue['title'].replace(',', '.'), 'url': issue['html_url'],
+                                 'body': issue['body']}
                 issueId = issue_details['url'].split('/')[-1]
                 filepath = issuePath + 'superset-issue-' + issueId + '.md'
                 with open(filepath, 'w', encoding='utf-8') as ff:
@@ -79,4 +79,3 @@ if __name__ == '__main__':
         print('以达到最大请求次数！')
     finally:
         f.close()
-
