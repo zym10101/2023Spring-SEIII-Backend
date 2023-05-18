@@ -130,7 +130,10 @@ class Issue(db.Model):
             self.pull_request_patch_url = issue_dict['pull_request']['patch_url']
             self.pull_request_merged_at = issue_dict['pull_request']['merged_at']
 
-        self.body = issue_dict['body']
+        if len(str(issue_dict['body'])) < 65536:
+            self.body = issue_dict['body']
+        else:
+            self.body = ""
         self.reactions_url = issue_dict['reactions']['url']
         self.reactions_total_count = issue_dict['reactions']['total_count']
         self.reactions_plus_one = issue_dict['reactions']['+1']
