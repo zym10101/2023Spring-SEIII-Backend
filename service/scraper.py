@@ -69,7 +69,7 @@ class MysqlSaveStrategy(IssueSaveStrategy):
 
 
 class GitHubScraper(ABC):
-    def get(self, repo_name='apache/superset', state='all', per_page=100, begin_page=1, end_page=10):
+    def get_and_save(self, repo_name='apache/superset', state='all', per_page=100, begin_page=1, end_page=10):
         # 初始化参数
         repo_name = repo_name.strip('/')
         url = self.url_template.format(repo_name)
@@ -82,7 +82,7 @@ class GitHubScraper(ABC):
 
         # 返回结果列表
         issues_ = []
-
+        issue_per_page = []
         # 循环处理每一页响应
         while True:
             print(f'正在爬取第{page_num}页')
@@ -92,6 +92,9 @@ class GitHubScraper(ABC):
             # 处理每一个issue
             for issue in json_data:
                 issues_.append(issue)
+                issue_per_page.append(issue)
+                self.save(issue_per_page)
+                issue_per_page = []
 
             # 检查Link响应头是否有下一页的URL
             link_header = response.headers.get('Link')
@@ -140,5 +143,5 @@ class GitHubIssueCommentScraper(GitHubScraper):
 if __name__ == '__main__':
     s = GitHubIssueScraper()
     # s = GitHubIssueScraper(issue_save_strategy=JsonSaveStrategy())
-    iss = s.get(per_page=2)
-    s.save(iss)
+    iss = s.get_and_save(per_page=2)
+    # s.save(iss)

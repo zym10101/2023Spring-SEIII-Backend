@@ -121,8 +121,8 @@ def resp_add_single():
 def issue_get_and_save_db():
     s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
                            access_token=ACCESS_TOKEN)
-    iss = s.get(per_page=100, end_page=50)
-    s.save(iss)
+    iss = s.get_and_save(per_page=100, end_page=10)
+    # s.save(iss)
     return "Issue数据保存到数据库成功!"
 
 
@@ -131,8 +131,8 @@ def issue_get_and_save_db():
 def issue_comments_get_and_save_db():
     s = GitHubIssueCommentScraper(issue_save_strategy=MysqlSaveStrategy(db, IssueComment),
                                   access_token=ACCESS_TOKEN)
-    iss = s.get(per_page=100, end_page=50)
-    s.save(iss)
+    iss = s.get_and_save(per_page=100, end_page=10)
+    # s.save(iss)
     return "IssueComment数据保存到数据库成功!"
 
 
@@ -141,8 +141,8 @@ def issue_comments_get_and_save_db():
 def issue_get_and_save_csv():
     path = './data/issues-tmp.csv'
     s = GitHubIssueScraper(issue_save_strategy=CsvSaveStrategy(path))
-    iss = s.get(per_page=2)
-    s.save(iss)
+    iss = s.get_and_save(per_page=2)
+    # s.save(iss)
     return f"数据保存到csv成功! 请前往项目根目录下{path}查看"
 
 
