@@ -69,7 +69,7 @@ class MysqlSaveStrategy(IssueSaveStrategy):
 
 
 class GitHubScraper(ABC):
-    def get_and_save(self, repo_name='apache/superset', state='all', per_page=100, begin_page=1, end_page=10):
+    def get_and_save(self, repo_name, state='all', per_page=100, begin_page=1, end_page=10):
         # 初始化参数
         repo_name = repo_name.strip('/')
         url = self.url_template.format(repo_name)

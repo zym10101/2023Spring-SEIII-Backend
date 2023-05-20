@@ -1,11 +1,11 @@
-from flask import Flask, render_template, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-import os
-from dotenv import load_dotenv
-from model.vo.issue import db, User, Issue, Label, IssueComment
-from service.scraper import CsvSaveStrategy, JsonSaveStrategy, \
-    MysqlSaveStrategy, GitHubIssueScraper, GitHubIssueCommentScraper
 import json
+import os
+
+from dotenv import load_dotenv
+from flask import Flask, render_template, request, jsonify
+
+from model.vo.issue import db, User, Issue, Label, IssueComment
+from service.scraper import CsvSaveStrategy, MysqlSaveStrategy, GitHubIssueScraper, GitHubIssueCommentScraper
 
 # 使用Flask类创建一个app对象
 # __name__：代表当前app.py这个模块
@@ -22,6 +22,8 @@ DB_DATABASE = os.environ.get('DB_DATABASE')
 ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN')
 app.config['SQLALCHEMY_DATABASE_URI'] \
     = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOSTNAME}:{DB_PORT}/{DB_DATABASE}?charset=utf8mb4"
+
+repo = ""
 
 # 在 Flask 中，应用程序实例和扩展是分离的，这意味着你需要在应用程序和扩展之间建立连接。
 # 当创建一个 SQLAlchemy 实例时，它并不知道与哪个 Flask 应用程序关联，所以需要使用 db.init_app(app) 方法将其关联起来。
@@ -76,7 +78,6 @@ def user_info():
     :return:
     """
     token = request.headers.get("token")
-    # print(token)
     if token == "666666":
         return jsonify({
             "code": 0,
@@ -116,12 +117,19 @@ def resp_add_single():
     return "用户创建成功!"
 
 
+@app.route("/project/info", methods=["POST"])
+def project_info():
+    global repo
+    repo = str(json.loads(request.data)['name'])[19:]
+    return repo
+
+
 # 请求：http://127.0.0.1:5000/issue/get-and-save-db
 @app.route("/issue/get-and-save-db")
 def issue_get_and_save_db():
     s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
                            access_token=ACCESS_TOKEN)
-    iss = s.get_and_save(per_page=100, end_page=10)
+    iss = s.get_and_save(repo_name=repo, per_page=100, end_page=10)
     # s.save(iss)
     return "Issue数据保存到数据库成功!"
 
@@ -131,7 +139,7 @@ def issue_get_and_save_db():
 def issue_comments_get_and_save_db():
     s = GitHubIssueCommentScraper(issue_save_strategy=MysqlSaveStrategy(db, IssueComment),
                                   access_token=ACCESS_TOKEN)
-    iss = s.get_and_save(per_page=100, end_page=10)
+    iss = s.get_and_save(repo_name=repo,per_page=100, end_page=10)
     # s.save(iss)
     return "IssueComment数据保存到数据库成功!"
 
@@ -141,7 +149,7 @@ def issue_comments_get_and_save_db():
 def issue_get_and_save_csv():
     path = './data/issues-tmp.csv'
     s = GitHubIssueScraper(issue_save_strategy=CsvSaveStrategy(path))
-    iss = s.get_and_save(per_page=2)
+    iss = s.get_and_save(repo_name=repo,per_page=2)
     # s.save(iss)
     return f"数据保存到csv成功! 请前往项目根目录下{path}查看"
 
