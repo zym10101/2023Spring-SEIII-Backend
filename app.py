@@ -127,6 +127,8 @@ def project_info():
 # 请求：http://127.0.0.1:5000/issue/get-and-save-db
 @app.route("/issue/get-and-save-db")
 def issue_get_and_save_db():
+    if repo == "":
+        return "项目名称不能为空！"
     s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
                            access_token=ACCESS_TOKEN)
     iss = s.get_and_save(repo_name=repo, per_page=100, end_page=10)
@@ -137,9 +139,11 @@ def issue_get_and_save_db():
 # 请求：http://127.0.0.1:5000/issue/comments/get-and-save-db
 @app.route("/issue/comments/get-and-save-db")
 def issue_comments_get_and_save_db():
+    if repo == "":
+        return "项目名称不能为空！"
     s = GitHubIssueCommentScraper(issue_save_strategy=MysqlSaveStrategy(db, IssueComment),
                                   access_token=ACCESS_TOKEN)
-    iss = s.get_and_save(repo_name=repo,per_page=100, end_page=10)
+    iss = s.get_and_save(repo_name=repo, per_page=100, end_page=10)
     # s.save(iss)
     return "IssueComment数据保存到数据库成功!"
 
@@ -149,7 +153,7 @@ def issue_comments_get_and_save_db():
 def issue_get_and_save_csv():
     path = './data/issues-tmp.csv'
     s = GitHubIssueScraper(issue_save_strategy=CsvSaveStrategy(path))
-    iss = s.get_and_save(repo_name=repo,per_page=2)
+    iss = s.get_and_save(repo_name=repo, per_page=2)
     # s.save(iss)
     return f"数据保存到csv成功! 请前往项目根目录下{path}查看"
 
