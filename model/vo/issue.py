@@ -63,7 +63,7 @@ class User(db.Model):
     # 头像链接
     avatar_url = db.Column(db.Text, nullable=False)
     # Gravatar ID
-    gravatar_id = db.Column(db.Text, nullable=False)
+    gravatar_id = db.Column(db.Text, nullable=True)
     # 用户 GitHub API 链接
     url = db.Column(db.Text, nullable=False)
     # 用户 GitHub 主页链接
