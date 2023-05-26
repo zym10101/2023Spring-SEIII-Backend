@@ -1,11 +1,12 @@
 import json
 import os
+import jpype
 
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
 
 from model.vo.issue import db, User, Issue, Label, IssueComment
-from service.dataAnalysis.BodyWasher import body_washer
+from service.data_analysis.body_washer import body_washer
 from service.scraper import CsvSaveStrategy, MysqlSaveStrategy, GitHubIssueScraper, GitHubIssueCommentScraper
 
 # 使用Flask类创建一个app对象
@@ -65,6 +66,8 @@ with app.app_context():
     # with db.engine.connect() as conn:
     #     rs = conn.execute("select * from tmp")
     #     print(rs.fetchone())
+
+jvm_shutdown = False
 
 
 @app.route("/")
@@ -194,10 +197,17 @@ def issue_get_and_cal_Senti():
     s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
                            access_token=ACCESS_TOKEN)
     iss = s.get_and_save(repo_name="apache/superset", per_page=100, end_page=5)
-
+    jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
     body_washer(db)
+    jvm_shutdown = True
+    return f"情绪值分析完毕"
 
-    return iss
+
+
+
+if jvm_shutdown:
+    jpype.shutdownJVM()
+    jvm_shutdown = False
 
 
 #

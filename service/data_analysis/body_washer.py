@@ -1,8 +1,8 @@
 import re
 
-import pandas as pd
-
 from model.vo.issue import Issue
+from service.data_analysis.cal_senti import cal_senti
+
 
 # df = pd.read_csv('../../data/superset_issues.csv', keep_default_na=False)
 
@@ -22,7 +22,12 @@ def body_washer(db):
             body_value = re.sub(pattern1, ' ', str(body_value))
             body_value = re.sub(pattern2, ' ', str(body_value))
             body_value = str(body_value).replace('<!---', '').replace('-->', '')
+            result = cal_senti(body_value).split(" ")
+            pos = result[0]
+            neg = result[1]
             issue.body = body_value
+            issue.pos_body = pos
+            issue.neg_body = neg
             db.session.add(issue)
         except StopIteration:
             break
