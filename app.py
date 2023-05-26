@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
 
 from model.vo.issue import db, User, Issue, Label, IssueComment
+from service.dataAnalysis.BodyWasher import body_washer
 from service.scraper import CsvSaveStrategy, MysqlSaveStrategy, GitHubIssueScraper, GitHubIssueCommentScraper
 
 # 使用Flask类创建一个app对象
@@ -153,6 +154,20 @@ def issue_get_and_save_csv():
     s = GitHubIssueScraper(issue_save_strategy=CsvSaveStrategy(path))
     iss = s.get_and_save(repo_name=repo, per_page=2)
     return f"数据保存到csv成功! 请前往项目根目录下{path}查看"
+
+
+# 请求：http://127.0.0.1:5000/issue/get-and-cal-Senti
+@app.route("/issue/get-and-cal-Senti")
+def issue_get_and_cal_Senti():
+    # if repo == "":
+    #     return "项目名称不能为空！"
+    s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
+                           access_token=ACCESS_TOKEN)
+    iss = s.get_and_save(repo_name="apache/superset", per_page=100, end_page=5)
+
+    body_washer(db)
+
+    return iss
 
 
 #
