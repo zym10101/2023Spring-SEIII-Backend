@@ -134,6 +134,9 @@ class Issue(db.Model):
             self.body = issue_dict['body']
         else:
             self.body = ""
+
+        self.pos_body = None
+        self.neg_body = None
         self.reactions_url = issue_dict['reactions']['url']
         self.reactions_total_count = issue_dict['reactions']['total_count']
         self.reactions_plus_one = issue_dict['reactions']['+1']
@@ -213,6 +216,9 @@ class Issue(db.Model):
     pull_request_merged_at = db.Column(db.Text, nullable=True)
     # 此issue的主体，即详细说明
     body = db.Column(db.Text, nullable=True)
+    # body部分SentiStrength评分
+    pos_body = db.Column(db.Text, nullable=True)
+    neg_body = db.Column(db.Text, nullable=True)
     # 该问题/issue的反应/表情符号的API地址
     reactions_url = db.Column(db.Text, nullable=False)
     # 该问题/issue所收到的反应/表情符号总数
@@ -274,7 +280,8 @@ class IssueComment(db.Model):
         self.updated_at = datetime.strptime(issue_dict['updated_at'], '%Y-%m-%dT%H:%M:%SZ')
         self.author_association = issue_dict['author_association']
         self.body = issue_dict['body']
-
+        self.pos_body = None
+        self.neg_body = None
         self.reactions_url = issue_dict['reactions']['url']
         self.reactions_total_count = issue_dict['reactions']['total_count']
         self.reactions_plus_one = issue_dict['reactions']['+1']
@@ -312,6 +319,9 @@ class IssueComment(db.Model):
     author_association = db.Column(db.Text, nullable=False)
     # 此issue comment的主体，即详细说明
     body = db.Column(db.Text, nullable=True)
+    # body部分SentiStrength评分
+    pos_body = db.Column(db.Text, nullable=True)
+    neg_body = db.Column(db.Text, nullable=True)
     # 该issue comment的反应/表情符号的API地址
     reactions_url = db.Column(db.Text, nullable=False)
     # 该issue comment所收到的反应/表情符号总数
