@@ -154,7 +154,7 @@ def issue_comments_get_and_save_db():
 # 请求：http://127.0.0.1:5000/issue/get-and-save-db
 # 在爬取issue的同时完成对响应comments的爬取
 @app.route("/get-and-save-db")
-def issue_get_and_save_db():
+def get_and_save_db():
     if repo == "":
         return "项目名称不能为空！"
     # 用于爬取问题
