@@ -126,13 +126,14 @@ def project_info():
 
 
 # 请求：http://127.0.0.1:5000/issue/get-and-save-db
+# 在爬取issue的同时完成对响应comments的爬取
 @app.route("/issue/get-and-save-db")
 def issue_get_and_save_db():
     if repo == "":
         return "项目名称不能为空！"
-    s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
-                           access_token=ACCESS_TOKEN)
-    iss = s.get_and_save(repo_name=repo, per_page=100, end_page=5)
+    issue_scraper = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
+                                       access_token=ACCESS_TOKEN)
+    iss, comments_urls = issue_scraper.get_and_save(repo_name=repo, per_page=100, end_page=5)
     return iss
 
 
@@ -145,6 +146,35 @@ def issue_comments_get_and_save_db():
                                   access_token=ACCESS_TOKEN)
     iss = s.get_and_save(repo_name=repo, per_page=100, end_page=5)
     return iss
+
+
+# 请求：http://127.0.0.1:5000/issue/get-and-save-db
+# 在爬取issue的同时完成对响应comments的爬取
+@app.route("/get-and-save-db")
+def issue_get_and_save_db():
+    if repo == "":
+        return "项目名称不能为空！"
+    # 用于爬取问题
+    issue_scraper = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
+                                       access_token=ACCESS_TOKEN)
+    # 用于爬取问题的评论
+    comment_scraper = GitHubIssueCommentScraper(issue_save_strategy=MysqlSaveStrategy(db, IssueComment),
+                                                access_token=ACCESS_TOKEN)
+    iss, comments_urls = issue_scraper.get_and_save(repo_name=repo, per_page=100, end_page=5)
+    for url in comments_urls:
+        comment_scraper.get_and_save_by_url(url=url, per_page=100, end_page=5)
+    return iss
+
+
+# # 请求：http://127.0.0.1:5000/issue/comments/get-and-save-db
+# @app.route("/issue/comments/get-and-save-db")
+# def issue_comments_get_and_save_db2():
+#     if repo == "":
+#         return "项目名称不能为空！"
+#     s = GitHubIssueCommentScraper(issue_save_strategy=MysqlSaveStrategy(db, IssueComment),
+#                                   access_token=ACCESS_TOKEN)
+#     iss = s.get_and_save(repo_name=repo, per_page=100, end_page=5)
+#     return iss
 
 
 # 请求：http://127.0.0.1:5000/issue/get-and-save-csv
