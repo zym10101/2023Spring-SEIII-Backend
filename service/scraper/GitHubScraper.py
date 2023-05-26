@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
 import requests
+import json
 
 
 class GitHubScraper(ABC):
     def __init__(self):
         self.access_token = None
         self.url_template = None
-        self.c = None
+        self.dao = None
 
     def _format_headers(self):
         headers = {'Content-Type': 'application/json',
@@ -36,7 +37,7 @@ class GitHubScraper(ABC):
             for issue in json_data:
                 issues_.append(issue)
                 issue_per_page.append(issue)
-                self.save(issue_per_page)
+                self.dao.save_single(issue)
                 issue_per_page = []
 
             # 检查Link响应头是否有下一页的URL
@@ -54,7 +55,3 @@ class GitHubScraper(ABC):
             else:
                 break
         return issues_
-
-    def save(self, issues_):
-        pass
-        # self.issue_save_strategy.save(issues_)

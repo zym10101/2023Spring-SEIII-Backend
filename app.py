@@ -16,7 +16,7 @@ from service.scraper.GitHubIssueScraper import GitHubIssueScraper
 from service.scraper.GitHubIssueCommentScraper import GitHubIssueCommentScraper
 
 # 导入环境变量
-from utils.Env import DB_HOSTNAME, DB_DATABASE, DB_USERNAME, DB_PASSWORD, DB_PORT
+from utils.Env import DB_HOSTNAME, DB_DATABASE, DB_USERNAME, DB_PASSWORD, DB_PORT, ACCESS_TOKEN
 
 # 使用Flask类创建一个app对象
 # __name__：代表当前app.py这个模块
@@ -99,20 +99,19 @@ def project_info():
     return repo
 
 
-# # 请求：http://127.0.0.1:5000/issue/get-and-save-db
-# @app.route("/issue/get-and-save-db")
-# def issue_get_and_save_db():
-#     if repo == "":
-#         return "项目名称不能为空！"
-#     issue_scraper = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
-#                                        access_token=ACCESS_TOKEN)
-#     iss, comments_urls = issue_scraper.get_and_save(repo_name=repo, per_page=100, end_page=5)
-#     return iss
+# 请求：http://127.0.0.1:5000/issue/get-and-save-db
+@app.route("/issue/get-and-save-db")
+def get_and_save_issue():
+    if repo == "":
+        return "项目名称不能为空！"
+    issue_scraper = GitHubIssueScraper(access_token=ACCESS_TOKEN)
+    iss, comments_urls = issue_scraper.get_and_save(repo_name=repo, per_page=100, end_page=5)
+    return iss
 
 
 # 请求：http://127.0.0.1:5000/issue/comments/get-and-save-db
 @app.route("/issue/comments/get-and-save-db")
-def issue_comments_get_and_save_db():
+def get_and_save_issue_comments():
     if repo == "":
         return "项目名称不能为空！"
     s = GitHubIssueCommentScraper(access_token=ACCESS_TOKEN)
@@ -123,7 +122,7 @@ def issue_comments_get_and_save_db():
 # 请求：http://127.0.0.1:5000/get-and-save-db
 # 在爬取issue的同时完成对响应comments的爬取
 @app.route("/get-and-save-db")
-def issue_get_and_save_db():
+def get_and_save_all():
     if repo == "":
         return "项目名称不能为空！"
     # 用于爬取问题

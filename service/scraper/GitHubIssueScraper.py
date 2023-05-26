@@ -1,5 +1,7 @@
+import json
 import requests
 from service.scraper.GitHubScraper import GitHubScraper
+from dao.IssueDao import IssueDao
 
 
 class GitHubIssueScraper(GitHubScraper):
@@ -10,7 +12,7 @@ class GitHubIssueScraper(GitHubScraper):
         else:
             self.access_token = None
         self.url_template = 'https://api.github.com/repos/{}/issues'
-        self.c = Issue
+        self.dao = IssueDao
 
     def get_and_save(self, repo_name, state='all', per_page=100, begin_page=1, end_page=10):
         # 初始化参数
@@ -38,7 +40,7 @@ class GitHubIssueScraper(GitHubScraper):
                 issues_.append(issue)
                 issue_per_page.append(issue)
                 comments_urls.append(issue['comments_url'])
-                self.save(issue_per_page)
+                self.dao.save_single(issue)
                 issue_per_page = []
 
             # 检查Link响应头是否有下一页的URL
@@ -56,7 +58,3 @@ class GitHubIssueScraper(GitHubScraper):
             else:
                 break
         return issues_, comments_urls
-
-    def save(self, issues_):
-        pass
-        # self.issue_save_strategy.save(issues_)

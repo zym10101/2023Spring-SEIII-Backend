@@ -1,4 +1,6 @@
 from dao.Database import db
+from model.User import User
+from datetime import datetime
 
 
 # IssueComment
@@ -81,18 +83,3 @@ class IssueComment(db.Model):
     reactions_eyes = db.Column(db.Integer, nullable=False)
     # 如果此issue comment通过GitHub应用程序创建，则为应用程序信息。
     performed_via_github_app = db.Column(db.Text, nullable=True)
-
-    @staticmethod
-    def save(session, json):
-        # 1.创建 User\Label ORM对象
-        user_ = User(json['user'])
-
-        # 2.创建 issue comment ORM对象
-        issue_comment_ = IssueComment(json)
-
-        # 3.将ORM对象添加到db.session中
-        session.merge(user_)
-        session.merge(issue_comment_)
-
-        # 4.确认提交
-        session.commit()

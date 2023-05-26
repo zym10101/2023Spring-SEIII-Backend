@@ -1,5 +1,7 @@
 from dao.Database import db
 from model.IssueLabel import IssueLabel
+from model.User import User
+from datetime import datetime
 
 
 # Issue
@@ -155,26 +157,6 @@ class Issue(db.Model):
     performed_via_github_app = db.Column(db.Text, nullable=True)
     # 关闭此issue时提供的关闭原因（如果适用）。
     state_reason = db.Column(db.Text, nullable=True)
-
-    @staticmethod
-    def save(session, json):
-        # 1.创建 User\Label ORM对象
-        user_ = User(json['user'])
-        labels_ = []
-        for label_ in json['labels']:
-            labels_.append(Label(label_))
-
-        # 2.创建 issue ORM对象
-        issue_ = Issue(json)
-        issue_.labels = labels_
-        print(issue_.labels)
-
-        # 3.将ORM对象添加到db.session中
-        session.merge(user_)
-        session.merge(issue_)
-
-        # 4.确认提交
-        session.commit()
 
     @staticmethod
     def read_by_row(session):
