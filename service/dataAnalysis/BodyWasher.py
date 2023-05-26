@@ -2,7 +2,7 @@ import re
 
 import pandas as pd
 
-from model.vo.issue import Issue
+from model.Issue import Issue
 
 # df = pd.read_csv('../../data/superset_issues.csv', keep_default_na=False)
 

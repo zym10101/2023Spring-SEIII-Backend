@@ -1,95 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-
-db = SQLAlchemy()
-
-# 解决 issue 与 label 的多对多关系
-issue_label = db.Table('issue_label',
-                       db.Column('issue_id', db.BigInteger, db.ForeignKey('issue.id'), primary_key=True),
-                       db.Column('label_id', db.BigInteger, db.ForeignKey('label.id'), primary_key=True)
-                       )
-
-
-# 表示 GitHub issue 的标签
-class Label(db.Model):
-    def __init__(self, init_dict):
-        self.id = init_dict['id']
-        self.node_id = init_dict['node_id']
-        self.url = init_dict['url']
-        self.name = init_dict['name']
-        self.color = init_dict['color']
-        self.default = init_dict['default']
-        self.description = init_dict['description']
-
-    __tablename__ = "label"
-    id = db.Column(db.BigInteger, primary_key=True)
-    node_id = db.Column(db.String(255), nullable=False)
-    url = db.Column(db.Text, nullable=False)
-    name = db.Column(db.String(255), nullable=False)
-    color = db.Column(db.String(64), nullable=False)
-    default = db.Column(db.Boolean, nullable=False)
-    description = db.Column(db.Text, nullable=True)
-
-
-# 表示该 GitHub issue 的作者的相关信息
-class User(db.Model):
-    def __init__(self, init_dict):
-        self.login = init_dict['login']
-        self.id = init_dict['id']
-        self.node_id = init_dict['node_id']
-        self.avatar_url = init_dict['avatar_url']
-        self.gravatar_id = init_dict['gravatar_id']
-        self.url = init_dict['url']
-        self.html_url = init_dict['html_url']
-        self.followers_url = init_dict['followers_url']
-        self.following_url = init_dict['following_url']
-        self.gists_url = init_dict['gists_url']
-        self.starred_url = init_dict['starred_url']
-        self.subscriptions_url = init_dict['subscriptions_url']
-        self.organizations_url = init_dict['organizations_url']
-        self.repos_url = init_dict['repos_url']
-        self.events_url = init_dict['events_url']
-        self.received_events_url = init_dict['received_events_url']
-        self.type = init_dict['type']
-        self.site_admin = init_dict['site_admin']
-
-    __tablename__ = "user"
-    # GitHub用户名
-    login = db.Column(db.Text, nullable=False)
-    # 用户ID
-    id = db.Column(db.Integer, primary_key=True)
-    # 用户节点ID
-    node_id = db.Column(db.Text, nullable=False)
-    # 头像链接
-    avatar_url = db.Column(db.Text, nullable=False)
-    # Gravatar ID
-    gravatar_id = db.Column(db.Text, nullable=True)
-    # 用户 GitHub API 链接
-    url = db.Column(db.Text, nullable=False)
-    # 用户 GitHub 主页链接
-    html_url = db.Column(db.Text, nullable=False)
-    # 用户关注者的 GitHub API 链接
-    followers_url = db.Column(db.Text, nullable=False)
-    # 用户正在关注的人的 GitHub API 链接
-    following_url = db.Column(db.Text, nullable=False)
-    # 用户 Gists 的 GitHub API 链接
-    gists_url = db.Column(db.Text, nullable=False)
-    # 用户收藏的项目的 GitHub API 链接
-    starred_url = db.Column(db.Text, nullable=False)
-    # 用户订阅的仓库的 GitHub API 链接
-    subscriptions_url = db.Column(db.Text, nullable=False)
-    # 用户所在的组织的 GitHub API 链接
-    organizations_url = db.Column(db.Text, nullable=False)
-    # 用户仓库的 GitHub API 链接
-    repos_url = db.Column(db.Text, nullable=False)
-    # 用户 GitHub 活动的 GitHub API 链接
-    events_url = db.Column(db.Text, nullable=False)
-    # 用户收到的 GitHub 活动的 GitHub API 链接
-    received_events_url = db.Column(db.Text, nullable=False)
-    # 用户类型（"User" 或 "Organization"）
-    type = db.Column(db.Text, nullable=False)
-    # 用户是否为 GitHub 网站管理员
-    site_admin = db.Column(db.Text, nullable=False)
+from dao.Database import db
+from model.IssueLabel import IssueLabel
 
 
 # Issue
@@ -179,7 +89,7 @@ class Issue(db.Model):
     # 此issue的作者，关联User模型
     user = db.relationship('User', backref='issue', lazy=True)
     # 此issue的标签列表，以逗号间隔
-    labels = db.relationship('Label', secondary=issue_label, backref=db.backref('issues', lazy='dynamic'))
+    labels = db.relationship('Label', secondary=IssueLabel, backref=db.backref('issues', lazy='dynamic'))
     # 此issue的状态，可以是 "open"，"closed"或其他自定义状态
     state = db.Column(db.Text, nullable=False)
     # 如果此issue已被锁定，则为true
@@ -263,6 +173,9 @@ class Issue(db.Model):
         session.merge(user_)
         session.merge(issue_)
 
+        # 4.确认提交
+        session.commit()
+
     @staticmethod
     def read_by_row(session):
         for issue in session.query(Issue):
@@ -274,97 +187,3 @@ class Issue(db.Model):
             .filter(Issue.created_at >= start_time) \
             .filter(Issue.created_at <= end_time) \
             .order_by(Issue.created_at.desc())
-
-
-# IssueComment
-class IssueComment(db.Model):
-    def __init__(self, issue_dict):
-        self.id = issue_dict['id']
-        self.url = issue_dict['url']
-        self.issue_url = issue_dict['issue_url']
-        self.html_url = issue_dict['html_url']
-        self.node_id = issue_dict['node_id']
-
-        self.user_id = issue_dict['user']['id']
-        self.user = User.query.get(self.user_id)
-
-        self.created_at = datetime.strptime(issue_dict['created_at'], '%Y-%m-%dT%H:%M:%SZ')
-        self.updated_at = datetime.strptime(issue_dict['updated_at'], '%Y-%m-%dT%H:%M:%SZ')
-        self.author_association = issue_dict['author_association']
-        self.body = issue_dict['body']
-        self.pos_body = None
-        self.neg_body = None
-        self.reactions_url = issue_dict['reactions']['url']
-        self.reactions_total_count = issue_dict['reactions']['total_count']
-        self.reactions_plus_one = issue_dict['reactions']['+1']
-        self.reactions_minus_one = issue_dict['reactions']['-1']
-        self.reactions_laugh = issue_dict['reactions']['laugh']
-        self.reactions_hooray = issue_dict['reactions']['hooray']
-        self.reactions_confused = issue_dict['reactions']['confused']
-        self.reactions_heart = issue_dict['reactions']['heart']
-        self.reactions_rocket = issue_dict['reactions']['rocket']
-        self.reactions_eyes = issue_dict['reactions']['eyes']
-
-        self.performed_via_github_app = issue_dict['performed_via_github_app']['name'] if issue_dict[
-            'performed_via_github_app'] else None
-
-    __tablename__ = "issue_comment"
-    # 此issue comment的唯一标识符
-    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    # 此comment的URL
-    url = db.Column(db.Text, nullable=False)
-    # 以HTML格式显示此issue comment的URL
-    html_url = db.Column(db.Text, nullable=False)
-    # 此issue comment对应的issue链接
-    issue_url = db.Column(db.Text, nullable=True)
-    # 此issue comment的节点ID
-    node_id = db.Column(db.Text, nullable=False)
-    # 此issue comment的作者id
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # 此issue的作者，关联User模型
-    user = db.relationship('User', backref='issue_comment', lazy=True)
-    # 此issue comment创建的日期和时间
-    created_at = db.Column(db.DateTime, nullable=False)
-    # 此issue comment最后更新的日期和时间
-    updated_at = db.Column(db.DateTime, nullable=False)
-    # 此issue comment作者与此存储库的关联程度，例如“成员”或“拥有者”
-    author_association = db.Column(db.Text, nullable=False)
-    # 此issue comment的主体，即详细说明
-    body = db.Column(db.Text, nullable=True)
-    # body部分SentiStrength评分
-    pos_body = db.Column(db.Text, nullable=True)
-    neg_body = db.Column(db.Text, nullable=True)
-    # 该issue comment的反应/表情符号的API地址
-    reactions_url = db.Column(db.Text, nullable=False)
-    # 该issue comment所收到的反应/表情符号总数
-    reactions_total_count = db.Column(db.Integer, nullable=False)
-    # 点赞的数量
-    reactions_plus_one = db.Column(db.Integer, nullable=False)
-    # 踩的数量
-    reactions_minus_one = db.Column(db.Integer, nullable=False)
-    # 大笑的数量
-    reactions_laugh = db.Column(db.Integer, nullable=False)
-    # 庆祝的数量
-    reactions_hooray = db.Column(db.Integer, nullable=False)
-    # 困惑的数量
-    reactions_confused = db.Column(db.Integer, nullable=False)
-    # 爱心的数量
-    reactions_heart = db.Column(db.Integer, nullable=False)
-    # 火箭的数量
-    reactions_rocket = db.Column(db.Integer, nullable=False)
-    # 眼睛的数量
-    reactions_eyes = db.Column(db.Integer, nullable=False)
-    # 如果此issue comment通过GitHub应用程序创建，则为应用程序信息。
-    performed_via_github_app = db.Column(db.Text, nullable=True)
-
-    @staticmethod
-    def save(session, json):
-        # 1.创建 User\Label ORM对象
-        user_ = User(json['user'])
-
-        # 2.创建 issue comment ORM对象
-        issue_comment_ = IssueComment(json)
-
-        # 3.将ORM对象添加到db.session中
-        session.merge(user_)
-        session.merge(issue_comment_)
