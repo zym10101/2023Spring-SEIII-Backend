@@ -1,16 +1,14 @@
 import requests
 from service.scraper.GitHubScraper import GitHubScraper
-from dao.saveStrategy.CsvSaveStrategy import CsvSaveStrategy
 
 
 class GitHubIssueScraper(GitHubScraper):
-    def __init__(self, access_token=None, issue_save_strategy=CsvSaveStrategy()):
+    def __init__(self, access_token=None):
         super().__init__()
         if access_token is not None or access_token != "":
             self.access_token = access_token
         else:
             self.access_token = None
-        self.issue_save_strategy = issue_save_strategy
         self.url_template = 'https://api.github.com/repos/{}/issues'
         self.c = Issue
 
@@ -58,3 +56,7 @@ class GitHubIssueScraper(GitHubScraper):
             else:
                 break
         return issues_, comments_urls
+
+    def save(self, issues_):
+        pass
+        # self.issue_save_strategy.save(issues_)

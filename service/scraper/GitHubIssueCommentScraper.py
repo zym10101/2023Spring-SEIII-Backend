@@ -1,13 +1,14 @@
 import requests
 from service.scraper.GitHubScraper import GitHubScraper
-from dao.saveStrategy.CsvSaveStrategy import CsvSaveStrategy
 
 
 class GitHubIssueCommentScraper(GitHubScraper):
-    def __init__(self, access_token=None, issue_save_strategy=CsvSaveStrategy()):
+    def __init__(self, access_token=None):
         super().__init__()
-        self.access_token = access_token
-        self.issue_save_strategy = issue_save_strategy
+        if access_token is not None or access_token != "":
+            self.access_token = access_token
+        else:
+            self.access_token = None
         self.url_template = 'https://api.github.com/repos/{}/issues/comments'
         self.c = IssueComment
 
@@ -51,3 +52,7 @@ class GitHubIssueCommentScraper(GitHubScraper):
             else:
                 break
         return issues_
+
+    def save(self, issues):
+        for issue in issues:
+            self.c.save(self.db.session, issue)

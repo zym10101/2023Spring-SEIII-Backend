@@ -5,7 +5,6 @@ import requests
 class GitHubScraper(ABC):
     def __init__(self):
         self.access_token = None
-        self.issue_save_strategy = None
         self.url_template = None
         self.c = None
 
@@ -57,4 +56,5 @@ class GitHubScraper(ABC):
         return issues_
 
     def save(self, issues_):
-        self.issue_save_strategy.save(issues_)
+        pass
+        # self.issue_save_strategy.save(issues_)

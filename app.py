@@ -14,7 +14,6 @@ from model.IssueComment import IssueComment
 from service.dataAnalysis.BodyWasher import body_washer
 from service.scraper.GitHubIssueScraper import GitHubIssueScraper
 from service.scraper.GitHubIssueCommentScraper import GitHubIssueCommentScraper
-from dao.saveStrategy import CsvSaveStrategy
 
 # 导入环境变量
 from utils.Env import DB_HOSTNAME, DB_DATABASE, DB_USERNAME, DB_PASSWORD, DB_PORT
@@ -116,8 +115,7 @@ def project_info():
 def issue_comments_get_and_save_db():
     if repo == "":
         return "项目名称不能为空！"
-    s = GitHubIssueCommentScraper(issue_save_strategy=MysqlSaveStrategy(db, IssueComment),
-                                  access_token=ACCESS_TOKEN)
+    s = GitHubIssueCommentScraper(access_token=ACCESS_TOKEN)
     iss = s.get_and_save(repo_name=repo, per_page=100, end_page=5)
     return iss
 
@@ -129,11 +127,9 @@ def issue_get_and_save_db():
     if repo == "":
         return "项目名称不能为空！"
     # 用于爬取问题
-    issue_scraper = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
-                                       access_token=ACCESS_TOKEN)
+    issue_scraper = GitHubIssueScraper(access_token=ACCESS_TOKEN)
     # 用于爬取问题的评论
-    comment_scraper = GitHubIssueCommentScraper(issue_save_strategy=MysqlSaveStrategy(db, IssueComment),
-                                                access_token=ACCESS_TOKEN)
+    comment_scraper = GitHubIssueCommentScraper(access_token=ACCESS_TOKEN)
     iss, comments_urls = issue_scraper.get_and_save(repo_name=repo, per_page=100, end_page=5)
     thread_pool.map(comment_scraper.get_and_save_by_url, comments_urls)
     return iss
@@ -154,7 +150,7 @@ def issue_get_and_save_db():
 @app.route("/issue/get-and-save-csv")
 def issue_get_and_save_csv():
     path = './data/issues-tmp.csv'
-    s = GitHubIssueScraper(issue_save_strategy=CsvSaveStrategy(path))
+    s = GitHubIssueScraper()
     iss = s.get_and_save(repo_name=repo, per_page=2)
     return f"数据保存到csv成功! 请前往项目根目录下{path}查看"
 
@@ -164,8 +160,7 @@ def issue_get_and_save_csv():
 def issue_get_and_cal_Senti():
     # if repo == "":
     #     return "项目名称不能为空！"
-    s = GitHubIssueScraper(issue_save_strategy=MysqlSaveStrategy(db, Issue),
-                           access_token=ACCESS_TOKEN)
+    s = GitHubIssueScraper(access_token=ACCESS_TOKEN)
     iss = s.get_and_save(repo_name="apache/superset", per_page=100, end_page=5)
 
     body_washer(db)
