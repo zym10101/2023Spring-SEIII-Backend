@@ -46,52 +46,61 @@ class GitHubScraper:
             print(f"Request failed with status code: {response.status_code}")
         return 0
 
-    async def crawling(self, url, params):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=self.headers, params=params) as response:
-                return await response.json()
+    # async def crawling(self, url, params):
+    #     async with aiohttp.ClientSession() as session:
+    #         async with session.get(url, headers=self.headers, params=params) as response:
+    #             return await response.json()
+    #
+    # def fetch_comments(self, comments_url):
+    #     return self.crawling(comments_url, None)
+    #
+    # async def crawling_issues_and_comments(self, repo_name, params):
+    #     issues_url = self.issues_url_template.format(repo_name)
+    #     total_page_num = self._get_total_pages(issues_url, params)
+    #     result = []
+    #     print('共有{}页数据'.format(total_page_num))
+    #     async with aiohttp.ClientSession() as session:
+    #         tasks = []
+    #         for page_no in range(1, min(6, total_page_num + 1)):  # Todo: 暂定最多5页
+    #             params['page'] = page_no
+    #             task = asyncio.create_task(self.crawling(issues_url, params))
+    #             tasks.append(task)
+    #         counter = 0
+    #         for task in asyncio.as_completed(tasks):
+    #             counter += 1
+    #             print('正在爬取第{}页'.format(counter))
+    #             issues_json = await task
+    #             for issue_json in issues_json:
+    #                 result.append(issue_json)
+    #                 comments_url = issue_json['comments_url']
+    #                 comments_json = await self.crawling(comments_url, None)
+    #                 issue_json['comments_json'] = comments_json
+    #                 IssueDao.save_single(issue_json)
+    #     return result
 
-    def fetch_comments(self, comments_url):
-        return self.crawling(comments_url, None)
-
-    async def crawling_issues_and_comments(self, repo_name, params):
-        issues_url = self.issues_url_template.format(repo_name)
-        total_page_num = self._get_total_pages(issues_url, params)
-        result = []
-        print('共有{}页数据'.format(total_page_num))
-        async with aiohttp.ClientSession() as session:
-            tasks = []
-            for page_no in range(1, total_page_num + 1):
-                print('正在爬取第{}页'.format(page_no))
-                params['page'] = page_no
-                task = asyncio.create_task(self.crawling(issues_url, params))
-                tasks.append(task)
-            for task in asyncio.as_completed(tasks):
-                issues_json = await task
-                for issue_json in issues_json:
-                    result.append(issue_json)
-                    comments_url = issue_json['comments_url']
-                    comments_json = await self.crawling(comments_url, None)
-                    issue_json['comments_json'] = comments_json
-                    IssueDao.save_single(issue_json)
-        return result
-
-    # 这是虽然使用线程池但没有添加异步的方法
+    # # 这是虽然使用线程池但没有添加异步的方法
     # def crawling(self, url, params):
     #     response = requests.get(url, headers=self.headers, params=params)
     #     return json.loads(response.text)
+    #
+    # def fetch_comments(self, comments_url):
+    #     return self.crawling(comments_url, None)
+    #
     # def crawling_issues_and_comments(self, repo_name, params):
     #     issues_url = self.issues_url_template.format(repo_name)
     #     total_page_num = self._get_total_pages(issues_url, params)
     #     result = []
     #     print('共有{}页数据'.format(total_page_num))
     #     futures = []
-    #     for page_no in range(1, total_page_num + 1):
-    #         print('正在爬取第{}页'.format(page_no))
+    #     for page_no in range(1, min(6, total_page_num + 1)):
+    #         # print('正在爬取第{}页'.format(page_no))
     #         params['page'] = page_no
     #         future = self.thread_pool.submit(self.crawling, issues_url, params)
     #         futures.append(future)
+    #     counter = 0
     #     for future in concurrent.futures.as_completed(futures):
+    #         counter += 1
+    #         print('正在爬取第{}页'.format(counter))
     #         issues_json = future.result()
     #         for issue_json in issues_json:
     #             result.append(issue_json)
@@ -103,22 +112,26 @@ class GitHubScraper:
     #     return result
 
     # 这是不使用线程池的方法
-    # def crawling_issues_and_comments(self, repo_name, params):
-    #     issues_url = self.issues_url_template.format(repo_name)
-    #     total_page_num = self._get_total_pages(issues_url, params)
-    #     result = []
-    #     print('共有{}页数据'.format(total_page_num))
-    #     for page_no in range(1, total_page_num + 1):
-    #         print('正在爬取第{}页'.format(page_no))
-    #         params['page'] = page_no
-    #         issues_json = self.crawling(issues_url, params)
-    #         for issue_json in issues_json:
-    #             result.append(issue_json)
-    #             comments_url = issue_json['comments_url']
-    #             comments_json = self.crawling(comments_url, None)  # 后续再考虑评论数量过多的情况
-    #             issue_json['comments_json'] = comments_json
-    #             IssueDao.save_single(issue_json)
-    #     return result
+    def crawling(self, url, params):
+        response = requests.get(url, headers=self.headers, params=params)
+        return json.loads(response.text)
+
+    def crawling_issues_and_comments(self, repo_name, params):
+        issues_url = self.issues_url_template.format(repo_name)
+        total_page_num = self._get_total_pages(issues_url, params)
+        result = []
+        print('共有{}页数据'.format(total_page_num))
+        for page_no in range(1, min(6, total_page_num + 1)):
+            print('正在爬取第{}页'.format(page_no))
+            params['page'] = page_no
+            issues_json = self.crawling(issues_url, params)
+            for issue_json in issues_json:
+                result.append(issue_json)
+                comments_url = issue_json['comments_url']
+                comments_json = self.crawling(comments_url, None)  # 后续再考虑评论数量过多的情况
+                issue_json['comments_json'] = comments_json
+                IssueDao.save_single(issue_json)
+        return result
 
 
 if __name__ == '__main__':

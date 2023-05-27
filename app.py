@@ -14,6 +14,7 @@ from model.User import User
 from model.Issue import Issue
 from model.Label import Label
 from model.Comment import Comment
+from model.Account import Account
 
 # 导入service层相关内容
 from service.data_analysis.body_washer_and_cal import body_washer_and_cal
@@ -85,6 +86,66 @@ jvm_shutdown = False
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+# 登陆注册相关功能
+@app.route('/register', methods=['POST'])
+def register():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    email = request.json.get('email')
+
+    if not username or not password or not email:
+        return jsonify(
+            {
+                'state': 0,
+                'message': 'Missing required fields'
+            }), 400
+
+    account = Account.query.filter_by(username=username).first()
+    if account:
+        return jsonify(
+            {
+                'state': 0,
+                'message': 'Username already exists'
+            }), 409
+
+    new_account = Account(username=username, password=password, email=email)
+    db.session.add(new_account)
+    db.session.commit()
+
+    return jsonify(
+        {
+            'state': 1,
+            'message': 'Registration successful'
+        }), 201
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username')
+    password = request.json.get('password')
+
+    if not username or not password:
+        return jsonify(
+            {
+                'state': 0,
+                'message': 'Missing required fields'
+            }), 400
+
+    account = Account.query.filter_by(username=username).first()
+    if not account or account.password != password:
+        return jsonify(
+            {
+                'state': 0,
+                'message': 'Invalid username or password'
+            }), 401
+
+    return jsonify(
+        {
+            'state': 1,
+            'message': 'Login successful'
+        }), 200
 
 
 @app.route("/user/info", methods=["GET", "POST"])
@@ -177,7 +238,7 @@ def get_and_save_all():
 
 # 在爬取issue的同时完成对响应comments的爬取
 @app.route("/crawling", methods=["POST"])
-async def crawling():
+def crawling():
     start = time.time()  # 记录函数开始时间
 
     data = json.loads(request.data)
@@ -193,7 +254,7 @@ async def crawling():
     if until != '':
         params.add_param('until', DateUtil.convert_to_iso8601(until))
     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
-    iss = await scraper.crawling_issues_and_comments(repo_name, params.to_dict())
+    iss = scraper.crawling_issues_and_comments(repo_name, params.to_dict())
 
     end = time.time()  # 记录函数结束时间
     elapsed_time = end - start  # 计算函数执行时间
