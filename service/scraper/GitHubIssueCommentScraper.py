@@ -1,6 +1,6 @@
 import requests
 from service.scraper.GitHubScraper import GitHubScraper
-from dao.IssueCommentDao import IssueCommentDao
+from dao import IssueCommentDao
 
 
 class GitHubIssueCommentScraper(GitHubScraper):

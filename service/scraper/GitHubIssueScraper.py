@@ -1,7 +1,7 @@
 import json
 import requests
 from service.scraper.GitHubScraper import GitHubScraper
-from dao.IssueDao import IssueDao
+from dao import IssueDao
 
 
 class GitHubIssueScraper(GitHubScraper):
