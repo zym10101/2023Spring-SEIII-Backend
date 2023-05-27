@@ -35,7 +35,7 @@ class GitHubScraper:
                 lines = link_header.split(',')
                 for line in lines:
                     if 'last' in line:
-                        match = re.search(r'page=(\d+)', line)
+                        match = re.search(r'[\?&]page=(\d+)', line)
                         if match:
                             total_pages = int(match.group(1))
                             return total_pages
