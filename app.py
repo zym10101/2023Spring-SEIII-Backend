@@ -200,7 +200,7 @@ async def crawling():
     print("函数执行时间：", elapsed_time, "秒")
 
     start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
-    send_crawling_completed(to_email, repo, start_time)
+    send_crawling_completed(to_email, repo_name, start_time)
 
     return iss
 
