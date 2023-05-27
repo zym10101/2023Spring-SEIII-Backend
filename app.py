@@ -16,7 +16,7 @@ from model.Label import Label
 from model.Comment import Comment
 
 # 导入service层相关内容
-from service.data_analysis.body_washer import body_washer
+from service.data_analysis.body_washer_and_cal import body_washer_and_cal
 from service.scraper.GitHubScraper import GitHubScraper
 from service.scraper.Params import Params
 from utils.Email import send_crawling_completed
@@ -230,21 +230,17 @@ async def crawling():
 
 
 # 请求：http://127.0.0.1:5000/issue/get-and-cal-Senti
-# @app.route("/issue/get-and-cal-Senti")
-# def issue_get_and_cal_Senti():
-#     # if repo == "":
-#     #     return "项目名称不能为空！"
-#     s = GitHubIssueScraper(access_token=ACCESS_TOKEN)
-#     iss = s.get_and_save(repo_name="apache/superset", per_page=100, end_page=5)
-#     jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
-#     body_washer(db)
-#     jvm_shutdown = True
-#     return f"情绪值分析完毕"
-#
-#
-# if jvm_shutdown:
-#     jpype.shutdownJVM()
-#     jvm_shutdown = False
+@app.route("/issue/cal-Senti")
+def issue_cal_Senti():
+    jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
+    body_washer_and_cal(db)
+    jvm_shutdown = True
+    return f"情绪值分析完毕"
+
+
+if jvm_shutdown:
+    jpype.shutdownJVM()
+    jvm_shutdown = False
 
 # @app.route("/email", methods=["POST"])
 # def email():
