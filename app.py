@@ -18,6 +18,7 @@ from model.Comment import Comment
 from service.data_analysis.body_washer import body_washer
 from service.scraper.GitHubScraper import GitHubScraper
 from service.scraper.Params import Params
+from utils.Email import send_crawling_completed
 
 # 导入环境变量
 from utils.Env import DB_HOSTNAME, DB_DATABASE, DB_USERNAME, DB_PASSWORD, DB_PORT, ACCESS_TOKEN
@@ -217,21 +218,27 @@ def crawling():
 
 
 # 请求：http://127.0.0.1:5000/issue/get-and-cal-Senti
-@app.route("/issue/get-and-cal-Senti")
-def issue_get_and_cal_Senti():
-    # if repo == "":
-    #     return "项目名称不能为空！"
-    s = GitHubIssueScraper(access_token=ACCESS_TOKEN)
-    iss = s.get_and_save(repo_name="apache/superset", per_page=100, end_page=5)
-    jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
-    body_washer(db)
-    jvm_shutdown = True
-    return f"情绪值分析完毕"
+# @app.route("/issue/get-and-cal-Senti")
+# def issue_get_and_cal_Senti():
+#     # if repo == "":
+#     #     return "项目名称不能为空！"
+#     s = GitHubIssueScraper(access_token=ACCESS_TOKEN)
+#     iss = s.get_and_save(repo_name="apache/superset", per_page=100, end_page=5)
+#     jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
+#     body_washer(db)
+#     jvm_shutdown = True
+#     return f"情绪值分析完毕"
+#
+#
+# if jvm_shutdown:
+#     jpype.shutdownJVM()
+#     jvm_shutdown = False
 
-
-if jvm_shutdown:
-    jpype.shutdownJVM()
-    jvm_shutdown = False
+@app.route("/email", methods=["POST"])
+def email():
+    receiver_email = str(json.loads(request.data)['email'])
+    send_crawling_completed(receiver_email, repo, '五百年以前')
+    return "邮件发送成功！"
 
 # 以下是一些Flask示例代码
 #
