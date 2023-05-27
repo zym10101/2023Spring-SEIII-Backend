@@ -246,11 +246,11 @@ async def crawling():
 #     jpype.shutdownJVM()
 #     jvm_shutdown = False
 
-@app.route("/email", methods=["POST"])
-def email():
-    receiver_email = str(json.loads(request.data)['email'])
-    send_crawling_completed(receiver_email, repo, '五百年以前')
-    return "邮件发送成功！"
+# @app.route("/email", methods=["POST"])
+# def email():
+#     receiver_email = str(json.loads(request.data)['email'])
+#     send_crawling_completed(receiver_email, repo, '五百年以前')
+#     return "邮件发送成功！"
 
 
 # 以下是一些Flask示例代码
