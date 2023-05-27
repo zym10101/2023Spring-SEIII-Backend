@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import jpype
 from dotenv import load_dotenv
 import concurrent.futures
@@ -174,22 +175,33 @@ def get_and_save_all():
     return iss
 
 
-# 请求：http://127.0.0.1:5000/crawling?repo=apache/superset&since=2023-03-17&until=2023-03-19
 # 在爬取issue的同时完成对响应comments的爬取
-@app.route("/crawling")
-def crawling():
-    repo_name = request.args.get('repo')
-    since = request.args.get('since')
-    until = request.args.get('until')
-    if repo_name is None:
+@app.route("/crawling", methods=["POST"])
+async def crawling():
+    start = time.time()  # 记录函数开始时间
+
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo', ''))
+    since = str(data.get('since', ''))
+    until = str(data.get('until', ''))
+    to_email = str(data.get('email', ''))
+    if repo_name == '':
         return "项目名称不能为空！"
     params = Params()
-    if since is not None:
+    if since == '':
         params.add_param('since', DateUtil.convert_to_iso8601(since))
-    if until is not None:
+    if until == '':
         params.add_param('until', DateUtil.convert_to_iso8601(until))
     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
-    iss = scraper.crawling_issues_and_comments(repo_name, params.to_dict())
+    iss = await scraper.crawling_issues_and_comments(repo_name, params.to_dict())
+
+    end = time.time()  # 记录函数结束时间
+    elapsed_time = end - start  # 计算函数执行时间
+    print("函数执行时间：", elapsed_time, "秒")
+
+    start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
+    send_crawling_completed(to_email, repo, start_time)
+
     return iss
 
 
@@ -239,6 +251,7 @@ def email():
     receiver_email = str(json.loads(request.data)['email'])
     send_crawling_completed(receiver_email, repo, '五百年以前')
     return "邮件发送成功！"
+
 
 # 以下是一些Flask示例代码
 #
