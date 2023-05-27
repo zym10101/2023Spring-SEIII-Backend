@@ -1,6 +1,8 @@
 import re
 
-from model.vo.issue import Issue
+import pandas as pd
+
+from model.Issue import Issue
 from service.data_analysis.cal_senti import cal_senti
 
 

@@ -1,0 +1,79 @@
+from dao.Database import db
+from model.User import User
+from model.Issue import Issue
+from model.Label import Label
+
+
+def save_single(json):
+    # 1.创建 User\Label ORM对象
+    user_ = User(json['user'])
+    labels_ = []
+    for label_ in json['labels']:
+        labels_.append(Label(label_))
+
+    # 2.创建 issue ORM对象
+    issue_ = Issue(json)
+    issue_.labels = labels_
+    print(issue_.labels)
+
+    # 3.将ORM对象添加到db.session中
+    db.session.merge(user_)
+    db.session.merge(issue_)
+
+    # 4.确认提交
+    db.session.commit()
+
+
+def get_by_repository(repo_name):
+    return Issue.query.filter(Issue.repository_url.endswith(repo_name)).all()
+
+
+def get_by_create_time_all(repo_name, begin_time, end_time):  # 左闭右开
+    return Issue.query \
+        .filter(Issue.repository_url.endswith(repo_name)) \
+        .filter(Issue.created_at.between(begin_time, end_time)) \
+        .all()
+
+
+def get_by_create_time_page(repo_name, begin_time, end_time, page_number, page_size):  # 左闭右开
+    pagination = Issue.query \
+        .filter(Issue.repository_url.endswith(repo_name)) \
+        .filter(Issue.created_at.between(begin_time, end_time)) \
+        .paginate(page=page_number, per_page=page_size)
+    return pagination.items
+
+
+def template():
+    # 1.条件查询
+    # 查询用户名为 "john" 的用户
+    user = User.query.filter(User.username == 'john').first()
+    # 查询邮箱以 "@example.com" 结尾的用户
+    users = User.query.filter(User.email.endswith('@example.com')).all()
+    # 查询 id 在指定范围内的用户
+    users = User.query.filter(User.id.between(1, 10)).all()
+
+    # 2.排序查询
+    users = User.query.order_by(User.username.asc()).all()
+
+    # 3.分页查询
+    page_number = 1
+    page_size = 10
+    pagination = User.query.paginate(page_number, per_page=page_size)
+    users = pagination.items
+
+    # 4.关联查询
+    user = User.query.get(user_id)
+    posts = user.posts.all()
+
+
+if __name__ == '__main__':
+    from app_template import app
+    from datetime import datetime
+
+    with app.app_context():
+        begin = datetime(2023, 3, 15)
+        end = datetime(2023, 3, 17)
+        result = get_by_create_time_page('flink', begin, end, 2, 5)
+        for each in result:
+            print(each.id)
+        print('查询到{}条'.format(len(result)))
