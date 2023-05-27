@@ -110,6 +110,14 @@ def register():
                 'message': 'Username already exists'
             }), 409
 
+    account = Account.query.filter_by(email=email).first()
+    if account:
+        return jsonify(
+            {
+                'state': 0,
+                'message': 'Email already exists'
+            }), 409
+
     new_account = Account(username=username, password=password, email=email)
     db.session.add(new_account)
     db.session.commit()
