@@ -188,9 +188,9 @@ async def crawling():
     if repo_name == '':
         return "项目名称不能为空！"
     params = Params()
-    if since == '':
+    if since != '':
         params.add_param('since', DateUtil.convert_to_iso8601(since))
-    if until == '':
+    if until != '':
         params.add_param('until', DateUtil.convert_to_iso8601(until))
     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
     iss = await scraper.crawling_issues_and_comments(repo_name, params.to_dict())
