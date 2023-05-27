@@ -1,5 +1,6 @@
 from dao.Database import db
 from model.IssueLabel import IssueLabel
+from model.IssueComment import IssueComment
 from model.User import User
 from datetime import datetime
 
@@ -90,8 +91,10 @@ class Issue(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     # 此issue的作者，关联User模型
     user = db.relationship('User', backref='issue', lazy=True)
-    # 此issue的标签列表，以逗号间隔
+    # 此issue的标签列表
     labels = db.relationship('Label', secondary=IssueLabel, backref=db.backref('issues', lazy='dynamic'))
+    # 此issue的comments列表
+    issue_comments = db.relationship('Comment', secondary=IssueComment, backref=db.backref('issues', lazy='dynamic'))
     # 此issue的状态，可以是 "open"，"closed"或其他自定义状态
     state = db.Column(db.Text, nullable=False)
     # 如果此issue已被锁定，则为true

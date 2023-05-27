@@ -2,22 +2,28 @@ from dao.Database import db
 from model.User import User
 from model.Issue import Issue
 from model.Label import Label
+from model.Comment import Comment
 
 
 def save_single(json):
-    # 1.创建 User\Label ORM对象
-    user_ = User(json['user'])
+    # 1.创建 User\Label\Comment ORM对象
+    users_ = [User(json['user'])]
     labels_ = []
     for label_ in json['labels']:
         labels_.append(Label(label_))
+    issue_comments_ = []
+    for comment_ in json['comments_json']:
+        issue_comments_.append(Comment(comment_))
+        users_.append(User(comment_['user']))
 
     # 2.创建 issue ORM对象
     issue_ = Issue(json)
     issue_.labels = labels_
-    print(issue_.labels)
+    issue_.issue_comments = issue_comments_
 
     # 3.将ORM对象添加到db.session中
-    db.session.merge(user_)
+    for user in users_:
+        db.session.merge(user)
     db.session.merge(issue_)
 
     # 4.确认提交
