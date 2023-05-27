@@ -2,8 +2,8 @@ import threading
 
 import jpype
 
-def cal_senti(body):
 
+def cal_senti(body):
     Sentistrength = jpype.JClass("uk.ac.wlv.sentistrength.SentiStrength")
 
     # 创建对象并调用方法

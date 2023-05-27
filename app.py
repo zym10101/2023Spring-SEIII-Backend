@@ -42,6 +42,36 @@ thread_pool = concurrent.futures.ThreadPoolExecutor()
 # 在 Flask-SQLAlchemy 中，db 是一个 SQLAlchemy 实例，包含了一系列的模型和操作数据库的方法。
 db.init_app(app)
 
+resp_dict_1 = json.loads(
+    '{"url":"https://api.github.com/repos/apache/superset/issues/24057",'
+    '"repository_url":"https://api.github.com/repos/apache/superset",'
+    '"labels_url":"https://api.github.com/repos/apache/superset/issues/24057/labels{/name}",'
+    '"comments_url":"https://api.github.com/repos/apache/superset/issues/24057/comments",'
+    '"events_url":"https://api.github.com/repos/apache/superset/issues/24057/events",'
+    '"html_url":"https://github.com/apache/superset/issues/24057","id":1710376301,"node_id":"I_kwDOAlosUs5l8kVt",'
+    '"number":24057,"title":"Need RBAC consultation","user":{"login":"bukreevai","id":18184117,'
+    '"node_id":"MDQ6VXNlcjE4MTg0MTE3","avatar_url":"https://avatars.githubusercontent.com/u/18184117?v=4",'
+    '"gravatar_id":"","url":"https://api.github.com/users/bukreevai","html_url":"https://github.com/bukreevai",'
+    '"followers_url":"https://api.github.com/users/bukreevai/followers",'
+    '"following_url":"https://api.github.com/users/bukreevai/following{/other_user}",'
+    '"gists_url":"https://api.github.com/users/bukreevai/gists{/gist_id}",'
+    '"starred_url":"https://api.github.com/users/bukreevai/starred{/owner}{/repo}",'
+    '"subscriptions_url":"https://api.github.com/users/bukreevai/subscriptions",'
+    '"organizations_url":"https://api.github.com/users/bukreevai/orgs",'
+    '"repos_url":"https://api.github.com/users/bukreevai/repos",'
+    '"events_url":"https://api.github.com/users/bukreevai/events{/privacy}",'
+    '"received_events_url":"https://api.github.com/users/bukreevai/received_events","type":"User",'
+    '"site_admin":false},"labels":[],"state":"open","locked":false,"assignee":null,"assignees":[],"milestone":null,'
+    '"comments":1,"created_at":"2023-05-15T15:53:19Z","updated_at":"2023-05-15T16:20:10Z","closed_at":null,'
+    '"author_association":"NONE","active_lock_reason":null,"body":"Can someone help with RBAC on Apache Superset: '
+    'what grants are needed for the Charts tab to display user charts I tried everything, nothing is given to the '
+    'interface/chart/list/ page","reactions":{'
+    '"url":"https://api.github.com/repos/apache/superset/issues/24057/reactions","total_count":0,"+1":0,"-1":0,'
+    '"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},'
+    '"timeline_url":"https://api.github.com/repos/apache/superset/issues/24057/timeline",'
+    '"performed_via_github_app":null,"state_reason":null}')
+
+
 with app.app_context():
     db.create_all()
 
