@@ -6,9 +6,6 @@ from dotenv import load_dotenv
 import concurrent.futures
 from flask import Flask, render_template, request, jsonify
 
-from model.vo.issue import db, User, Issue, Label, IssueComment
-from service.data_analysis.body_washer import body_washer
-from service.scraper import CsvSaveStrategy, MysqlSaveStrategy, GitHubIssueScraper, GitHubIssueCommentScraper
 # 导入database
 from dao.Database import db
 
@@ -18,7 +15,8 @@ from model.Issue import Issue
 from model.Label import Label
 from model.IssueComment import IssueComment
 
-from service.dataAnalysis.BodyWasher import body_washer
+# 导入service层相关内容
+from service.data_analysis.body_washer import body_washer
 from service.scraper.GitHubIssueScraper import GitHubIssueScraper
 from service.scraper.GitHubIssueCommentScraper import GitHubIssueCommentScraper
 
@@ -46,6 +44,8 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
+
+jvm_shutdown = False
 
 
 @app.route("/")
@@ -174,12 +174,9 @@ def issue_get_and_cal_Senti():
     return f"情绪值分析完毕"
 
 
-
-
 if jvm_shutdown:
     jpype.shutdownJVM()
     jvm_shutdown = False
-
 
 # 以下是一些Flask示例代码
 #
