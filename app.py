@@ -158,20 +158,37 @@ def project_info():
 #     return iss
 
 
+# 注意：此接口将在后续废弃!!!由crawling替代
 # 请求：http://127.0.0.1:5000/get-and-save-db
 # 在爬取issue的同时完成对响应comments的爬取
 @app.route("/issue/get-and-save-db")
 def get_and_save_all():
     if repo == "":
         return "项目名称不能为空！"
-    # 用于爬取问题
     params = Params()
-    params.add_param('since', DateUtil.convert_to_iso8601('2023-03-15'))
-    params.add_param('until', DateUtil.convert_to_iso8601('2023-03-17'))
-    params.add_param('per_page', '10')
-    params.add_param('page', '2')
+    params.add_param('since', DateUtil.convert_to_iso8601("2023-03-15"))
+    params.add_param('until', DateUtil.convert_to_iso8601("2023-03-17"))
     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
     iss = scraper.crawling_issues_and_comments(repo, params.to_dict())
+    return iss
+
+
+# 请求：http://127.0.0.1:5000/crawling?repo=apache/superset&since=2023-03-17&until=2023-03-19
+# 在爬取issue的同时完成对响应comments的爬取
+@app.route("/crawling")
+def crawling():
+    repo_name = request.args.get('repo')
+    since = request.args.get('since')
+    until = request.args.get('until')
+    if repo_name is None:
+        return "项目名称不能为空！"
+    params = Params()
+    if since is not None:
+        params.add_param('since', DateUtil.convert_to_iso8601(since))
+    if until is not None:
+        params.add_param('until', DateUtil.convert_to_iso8601(until))
+    scraper = GitHubScraper(access_token=ACCESS_TOKEN)
+    iss = scraper.crawling_issues_and_comments(repo_name, params.to_dict())
     return iss
 
 

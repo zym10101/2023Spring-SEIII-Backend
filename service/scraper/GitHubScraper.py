@@ -16,7 +16,7 @@ class GitHubScraper:
         self.issues_url_template = 'https://api.github.com/repos/{}/issues'
         # self.comments_url_template = 'https://api.github.com/repos/{}/issues/comments'
 
-    def get_total_pages(self, url, params):
+    def _get_total_pages(self, url, params):
         """
         获取可响应的总页数
         :param url: 本次任务中其中一次请求的url
@@ -47,13 +47,20 @@ class GitHubScraper:
 
     def crawling_issues_and_comments(self, repo_name, params):
         issues_url = self.issues_url_template.format(repo_name)
-        issues_json = self.crawling(issues_url, params)
-        for issue_json in issues_json:
-            comments_url = issue_json['comments_url']
-            comments_json = self.crawling(comments_url, None)
-            issue_json['comments_json'] = comments_json
-            IssueDao.save_single(issue_json)
-        return issues_json
+        total_page_num = self._get_total_pages(issues_url, params)
+        result = []
+        print('共有{}页数据'.format(total_page_num))
+        for page_no in range(1, total_page_num + 1):
+            print('正在爬取第{}页'.format(page_no))
+            params['page'] = page_no
+            issues_json = self.crawling(issues_url, params)
+            for issue_json in issues_json:
+                result.append(issue_json)
+                comments_url = issue_json['comments_url']
+                comments_json = self.crawling(comments_url, None)  # 后续再考虑评论数量过多的情况
+                issue_json['comments_json'] = comments_json
+                IssueDao.save_single(issue_json)
+        return result
 
 
 if __name__ == '__main__':
