@@ -10,3 +10,6 @@ pip install -r requirements.txt
 
 ② 爬取时数据统一存储在数据库中，进行分析或前端需要下载时再用pandas等检索
 
+ pip install flask[async]
+
+

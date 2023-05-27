@@ -11,3 +11,7 @@ def convert_to_iso8601(date_string):
     date_obj = datetime.strptime(date_string, input_format)
     iso8601_date = date_obj.strftime('%Y-%m-%dT%H:%M:%SZ')
     return iso8601_date
+
+
+if __name__ == '__main__':
+    print(convert_to_iso8601('2023-5-1'))
