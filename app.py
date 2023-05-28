@@ -36,8 +36,6 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] \
     = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOSTNAME}:{DB_PORT}/{DB_DATABASE}?charset=utf8mb4"
 
-repo = ""
-
 # 创建线程池
 thread_pool = concurrent.futures.ThreadPoolExecutor()
 
@@ -202,11 +200,11 @@ def user_info():
 #     return "用户创建成功!"
 
 
-@app.route("/project/info", methods=["POST"])
-def project_info():
-    global repo
-    repo = str(json.loads(request.data)['name'])[19:]
-    return repo
+# @app.route("/project/info", methods=["POST"])
+# def project_info():
+#     global repo
+#     repo = str(json.loads(request.data)['name'])[19:]
+#     return repo
 
 
 # # 请求：http://127.0.0.1:5000/issue/get-and-save-db
@@ -232,16 +230,16 @@ def project_info():
 # 注意：此接口将在后续废弃!!!由crawling替代
 # 请求：http://127.0.0.1:5000/issue/get-and-save-db
 # 在爬取issue的同时完成对响应comments的爬取
-@app.route("/issue/get-and-save-db")
-def get_and_save_all():
-    # if repo == "":
-    #     return "项目名称不能为空！"
-    params = Params()
-    params.add_param('since', DateUtil.convert_to_iso8601("2023-03-15"))
-    params.add_param('until', DateUtil.convert_to_iso8601("2023-03-17"))
-    scraper = GitHubScraper(access_token=ACCESS_TOKEN)
-    iss = scraper.crawling_issues_and_comments("www.github/apache/superset", params.to_dict())
-    return iss
+# @app.route("/issue/get-and-save-db")
+# def get_and_save_all():
+#     # if repo == "":
+#     #     return "项目名称不能为空！"
+#     params = Params()
+#     params.add_param('since', DateUtil.convert_to_iso8601("2023-03-15"))
+#     params.add_param('until', DateUtil.convert_to_iso8601("2023-03-17"))
+#     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
+#     iss = scraper.crawling_issues_and_comments("www.github/apache/superset", params.to_dict())
+#     return iss
 
 
 # 在爬取issue的同时完成对响应comments的爬取
