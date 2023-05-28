@@ -83,3 +83,9 @@ class Comment(db.Model):
     reactions_eyes = db.Column(db.Integer, nullable=False)
     # 如果此issue comment通过GitHub应用程序创建，则为应用程序信息。
     performed_via_github_app = db.Column(db.Text, nullable=True)
+
+    # 在dao层完成之前临时加了用一下
+    @staticmethod
+    def read_by_row(session):
+        for comment in session.query(Comment):
+            yield comment

@@ -230,17 +230,17 @@ def project_info():
 
 
 # 注意：此接口将在后续废弃!!!由crawling替代
-# 请求：http://127.0.0.1:5000/get-and-save-db
+# 请求：http://127.0.0.1:5000/issue/get-and-save-db
 # 在爬取issue的同时完成对响应comments的爬取
 @app.route("/issue/get-and-save-db")
 def get_and_save_all():
-    if repo == "":
-        return "项目名称不能为空！"
+    # if repo == "":
+    #     return "项目名称不能为空！"
     params = Params()
     params.add_param('since', DateUtil.convert_to_iso8601("2023-03-15"))
     params.add_param('until', DateUtil.convert_to_iso8601("2023-03-17"))
     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
-    iss = scraper.crawling_issues_and_comments(repo, params.to_dict())
+    iss = scraper.crawling_issues_and_comments("www.github/apache/superset", params.to_dict())
     return iss
 
 
@@ -298,18 +298,15 @@ def crawling():
 #     return f"数据保存到csv成功! 请前往项目根目录下{path}查看"
 
 
-# 请求：http://127.0.0.1:5000/issue/get-and-cal-Senti
+# 请求：http://127.0.0.1:5000/issue/cal-Senti
 @app.route("/issue/cal-Senti")
 def issue_cal_Senti():
-    jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
     body_washer_and_cal(db)
-    jvm_shutdown = True
     return f"情绪值分析完毕"
 
+# 随着app的启动，开启jvm，保证只开启这一个jvm
+jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
 
-if jvm_shutdown:
-    jpype.shutdownJVM()
-    jvm_shutdown = False
 
 # @app.route("/email", methods=["POST"])
 # def email():

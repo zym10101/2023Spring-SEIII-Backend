@@ -2,7 +2,8 @@ import re
 
 import pandas as pd
 
-from model.Issue import Issue, IssueComment
+from model.Issue import Issue
+from model.Comment import Comment
 from service.data_analysis.cal_senti import cal_senti
 
 
@@ -18,6 +19,7 @@ def body_washer_and_cal(db):
     while True:
         try:
             issue = next(issues)
+            #生成issue.body的情绪值
             body_value = issue.body
             pattern1 = r'!?\[.*?\]\(.*?\)'
             pattern2 = r'<.*?>'
@@ -34,8 +36,8 @@ def body_washer_and_cal(db):
         except StopIteration:
             break
 
-        # 生成器
-    issues_comments = IssueComment.read_by_row(db.session)
+    # 生成器
+    issues_comments = Comment.read_by_row(db.session)
 
     while True:
         try:
