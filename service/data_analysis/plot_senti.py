@@ -1,6 +1,8 @@
 from dao.IssueDao import get_by_create_time_all
 import pandas as pd
 import plotly.graph_objs as go
+import datetime
+import math
 
 
 def get_pct(repo_name, start_time, end_time, polarity):
@@ -44,34 +46,49 @@ def get_issue_neg_pct(repo_name, start_time, end_time):
         return pct
 
 
-# interval格式: “xxD”，如”60D“表示60天
-def plot_pct_over_time(repo_name, start_time, end_time, interval):
+def plot_pct_over_time(repo_name, start_time, end_time):
     if get_issue_pos_pct(repo_name, start_time, end_time) != f"该时间段内，{repo_name} issue为空！":
-        # 准备数据，将总体之间划分为指定间隔
-        index = pd.date_range(start_time, end_time, freq=interval)
+        # 准备数据，将总体之间划分为指定间隔，假设为固定的8个间隔
+        # 计算日期间隔的总天数
+        time_interval = start_time - end_time
+        total_days = time_interval.days
+        # 计算每个区间的天数
+        interval_days = math.ceil(total_days / 8)
+        # 计算每个区间的起始日期和结束日期
+        current_date = start_time
+        intervals = []
+        for i in range(8):
+            interval_start = current_date
+            interval_end = current_date + datetime.timedelta(days=interval_days)
+            intervals.append((interval_start, interval_end))
+            current_date = interval_end
+
+        # 如果最后一个区间的结束日期不等于总日期间隔的结束日期，则将最后一个区间的结束日期设置为总日期间隔的结束日期
+        if intervals[-1][1] != end_time:
+            intervals[-1] = (intervals[-1][0], end_time)
+        index = []
+        for i in range(8):
+            index.append(str(intervals[i][0]) + '~' + str(intervals[i][1]))
         # 定义空数组用于保存结果
         pos_list = []
         neg_list = []
         # 循环遍历这些时间点
-        for i in range(len(index)):
-            start_t = index[i]
-            end_t = index[i+1]
+        for i in range(8):
+            start_t = intervals[i][0]
+            end_t = intervals[i][1]
             pos_list.append(get_issue_pos_pct(repo_name, start_t, end_t))
             neg_list.append(get_issue_neg_pct(repo_name, start_t, end_t))
-        # 将数据转化为dataframe对象
-        pos_pct = pd.Series(pos_list)
-        neg_pct = pd.Series(neg_list)
 
         # 创建两条折线，基计得分和消极得分
         trace1 = go.Scatter(
             x=index,
-            y=pos_pct,
+            y=pos_list,
             mode='lines',
             name='积极文本占比'
         )
         trace2 = go.Scatter(
             x=index,
-            y=neg_pct,
+            y=neg_list,
             mode='lines',
             name='消极文本占比'
         )
