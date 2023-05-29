@@ -98,6 +98,17 @@ def get_issues_by_label_name(repo_name, label_name, begin_time, end_time):
     return issues
 
 
+# 根据label_name获取对应的issue的comments
+def get_comments_by_label_name(repo_name, label_name, begin_time, end_time):
+    issues = get_issues_by_label_name(repo_name,label_name,begin_time,end_time)
+    comments = []
+    for issue in issues:
+        # print(issue.comments)
+        comments.extend(issue.comments)
+    return comments
+
+
+
 def get_by_reactions(repo_name, begin_time, end_time, reaction, nums=1):
     query = Issue.query \
         .filter(Issue.repository_url.endswith(repo_name)) \
@@ -107,6 +118,18 @@ def get_by_reactions(repo_name, begin_time, end_time, reaction, nums=1):
     results = query.all()
     return results
 
+
+def get_comments_by_reactions(repo_name, begin_time, end_time, reaction, nums=1):
+    issues = Issue.query \
+        .filter(Issue.repository_url.endswith(repo_name)) \
+        .filter(Issue.created_at.between(begin_time, end_time)) \
+        .all()
+    comments = []
+    for issue in issues:
+        # print(issue.comments)
+        comments.extend(issue.comments)
+    results = [comment for comment in comments if getattr(comment, "reactions_" + reaction) >= nums]
+    return results
 
 def template():
     # 1.条件查询

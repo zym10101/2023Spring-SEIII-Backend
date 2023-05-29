@@ -53,3 +53,27 @@ def get_comment_pct_by_issue(issue, polarity):
         return pos_count / len(comments)
     else:
         return neg_count / len(comments)
+
+
+# 根据comment列表获取积极/消极情绪值占比
+def get_comment_pct(comments, polarity):
+    if len(comments) == 0:
+        return f"comment为空！"
+
+    pos_count = 0
+    neg_count = 0
+    neutral_count = 0
+
+    for comment in comments:
+        result = int(comment.pos_body) + int(comment.neg_body)
+        if result > 0:
+            pos_count = pos_count + 1
+        elif result == 0:
+            neutral_count = neutral_count + 1
+        else:
+            neg_count = neg_count + 1
+
+    if polarity == "pos":
+        return pos_count / len(comments)
+    else:
+        return neg_count / len(comments)
