@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from sqlalchemy import distinct, or_
 
 from dao.Database import db
@@ -66,6 +68,25 @@ def get_labels(repo_name, begin_time, end_time):
     labels = Label.query.filter(or_(*[Label.id == id for id in label_id])).with_entities(Label.name).all()
     label_names = list(set([label.name for label in labels]))
     return label_names
+
+
+def get_labels_8(repo_name, begin_time, end_time):
+    labels_list = [issue.labels for issue in Issue.query \
+        .filter(Issue.repository_url.endswith(repo_name)) \
+        .filter(Issue.created_at.between(begin_time, end_time)) \
+        .all()]
+    labels = list(set(element for sublist in labels_list for element in sublist))
+    issues = get_by_create_time_all(repo_name, begin_time, end_time)
+    label_count = {}
+    for issue in issues:
+        for label in issue.labels:
+            if label.id in label_count:
+                label_count[label.id] += 1
+            else:
+                label_count[label.id] = 1
+    sorted_labels = sorted(label_count.items(), key=lambda x: x[1], reverse=True)[:8]
+    top_labels = [Label.query.get(label_id) for label_id, count in sorted_labels]
+    return top_labels
 
 
 def get_issues_by_label_name(repo_name, label_name, begin_time, end_time):
