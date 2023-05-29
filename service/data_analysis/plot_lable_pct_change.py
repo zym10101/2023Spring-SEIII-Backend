@@ -1,4 +1,4 @@
-from dao.IssueDao import get_labels_8
+from dao.LabelDao import get_labels_8
 from service.data_analysis.get_senti_pct_by_label import get_issue_senti_pct_by_label, get_comment_senti_pct_by_label
 from utils.DateUtil import convert_to_iso8601
 from utils.plot_pct_change import plot_pct_change
