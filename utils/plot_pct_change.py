@@ -25,5 +25,5 @@ def plot_pct_change(index, pos_list, neg_list):
     )
     # 绘制图表
     fig = go.Figure(data=[trace1, trace2], layout=layout)
-    # fig.show()
+    fig.show()
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
