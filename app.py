@@ -302,9 +302,9 @@ def issue_cal_Senti():
     body_washer_and_cal(db)
     return f"情绪值分析完毕"
 
+
 # 随着app的启动，开启jvm，保证只开启这一个jvm
 jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
-
 
 # @app.route("/email", methods=["POST"])
 # def email():
