@@ -25,7 +25,7 @@ def plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals):
             pos_list.append(get_issue_pos_pct(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t)))
             neg_list.append(get_issue_neg_pct(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t)))
 
-        return plot_pct_change(index, pos_list, neg_list)
+        return plot_pct_change(index, pos_list, neg_list, '项目issue情绪文本占比波动图')
 
 
 def plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals):
@@ -43,4 +43,4 @@ def plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals):
             pos_list.append(get_comment_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos'))
             neg_list.append(get_comment_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg'))
 
-        return plot_pct_change(index, pos_list, neg_list)
+        return plot_pct_change(index, pos_list, neg_list, '项目issue情绪文本占比波动图')

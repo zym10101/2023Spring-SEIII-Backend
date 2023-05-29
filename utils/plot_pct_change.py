@@ -3,7 +3,7 @@ import plotly
 import json
 
 
-def plot_pct_change(index, pos_list, neg_list):
+def plot_pct_change(index, pos_list, neg_list, title):
     # 创建两条折线，基计得分和消极得分
     trace1 = go.Scatter(
         x=index,
@@ -19,7 +19,7 @@ def plot_pct_change(index, pos_list, neg_list):
     )
     # 设置图表布局
     layout = go.Layout(
-        title='项目情绪文本占比波动图',
+        title=title,
         xaxis=dict(title='Date'),
         yaxis=dict(title='Score')
     )
