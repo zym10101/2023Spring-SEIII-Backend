@@ -71,11 +71,6 @@ def get_labels(repo_name, begin_time, end_time):
 
 
 def get_labels_8(repo_name, begin_time, end_time):
-    labels_list = [issue.labels for issue in Issue.query \
-        .filter(Issue.repository_url.endswith(repo_name)) \
-        .filter(Issue.created_at.between(begin_time, end_time)) \
-        .all()]
-    labels = list(set(element for sublist in labels_list for element in sublist))
     issues = get_by_create_time_all(repo_name, begin_time, end_time)
     label_count = {}
     for issue in issues:
@@ -84,9 +79,13 @@ def get_labels_8(repo_name, begin_time, end_time):
                 label_count[label.id] += 1
             else:
                 label_count[label.id] = 1
-    sorted_labels = sorted(label_count.items(), key=lambda x: x[1], reverse=True)[:8]
+
+    if(len(label_count) > 8):
+        sorted_labels = sorted(label_count.items(), key=lambda x: x[1], reverse=True)[:8]
+    else:
+        sorted_labels = sorted(label_count.items(), key=lambda x: x[1], reverse=True)
     top_labels = [Label.query.get(label_id) for label_id, count in sorted_labels]
-    return top_labels
+    return list(set([label.name for label in top_labels]))
 
 
 def get_issues_by_label_name(repo_name, label_name, begin_time, end_time):
