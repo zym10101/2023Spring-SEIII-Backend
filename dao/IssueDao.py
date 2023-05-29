@@ -1,8 +1,9 @@
 from collections import defaultdict
 
-from sqlalchemy import distinct, or_
+from sqlalchemy import *
 
 from dao.Database import db
+from model.IssueComment import IssueComment
 from model.User import User
 from model.Issue import Issue
 from model.Label import Label
@@ -80,7 +81,7 @@ def get_labels_8(repo_name, begin_time, end_time):
             else:
                 label_count[label.id] = 1
 
-    if(len(label_count) > 8):
+    if (len(label_count) > 8):
         sorted_labels = sorted(label_count.items(), key=lambda x: x[1], reverse=True)[:8]
     else:
         sorted_labels = sorted(label_count.items(), key=lambda x: x[1], reverse=True)
@@ -91,7 +92,7 @@ def get_labels_8(repo_name, begin_time, end_time):
 def get_issues_by_label_name(repo_name, label_name, begin_time, end_time):
     labels = Label.query.filter(Label.name == label_name).all()
     label_id = [label.id for label in labels]
-    issues = list(set(Issue.query.filter(Issue.labels.any(or_(*[Label.id == id for id in label_id])))\
+    issues = list(set(Issue.query.filter(Issue.labels.any(or_(*[Label.id == id for id in label_id]))) \
                       .filter(Issue.repository_url.endswith(repo_name)) \
                       .filter(Issue.created_at.between(begin_time, end_time)) \
                       .all()))
@@ -100,13 +101,11 @@ def get_issues_by_label_name(repo_name, label_name, begin_time, end_time):
 
 # 根据label_name获取对应的issue的comments
 def get_comments_by_label_name(repo_name, label_name, begin_time, end_time):
-    issues = get_issues_by_label_name(repo_name,label_name,begin_time,end_time)
+    issues = get_issues_by_label_name(repo_name, label_name, begin_time, end_time)
     comments = []
     for issue in issues:
-        # print(issue.comments)
-        comments.extend(issue.comments)
+        comments.extend(issue.issue_comments)
     return comments
-
 
 
 def get_by_reactions(repo_name, begin_time, end_time, reaction, nums=1):
@@ -120,16 +119,16 @@ def get_by_reactions(repo_name, begin_time, end_time, reaction, nums=1):
 
 
 def get_comments_by_reactions(repo_name, begin_time, end_time, reaction, nums=1):
-    issues = Issue.query \
+    comments = Comment.query \
+        .join(IssueComment) \
+        .join(Issue) \
         .filter(Issue.repository_url.endswith(repo_name)) \
         .filter(Issue.created_at.between(begin_time, end_time)) \
+        .filter(getattr(Comment, "reactions_" + reaction) >= nums) \
         .all()
-    comments = []
-    for issue in issues:
-        # print(issue.comments)
-        comments.extend(issue.comments)
-    results = [comment for comment in comments if getattr(comment, "reactions_" + reaction) >= nums]
-    return results
+    # 返回结果
+    return comments
+
 
 def template():
     # 1.条件查询

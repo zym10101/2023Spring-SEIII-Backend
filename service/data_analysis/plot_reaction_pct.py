@@ -1,4 +1,5 @@
-from get_senti_pct_by_reaction import get_issue_senti_pct_by_reaction, get_comment_senti_pct_by_reaction
+from service.data_analysis.get_senti_pct_by_reaction import get_issue_senti_pct_by_reaction, \
+    get_comment_senti_pct_by_reaction
 from utils.DateUtil import convert_to_iso8601
 from utils.plot_pct_change import plot_pct_change
 
