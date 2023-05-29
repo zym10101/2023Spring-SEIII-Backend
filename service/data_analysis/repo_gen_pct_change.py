@@ -1,41 +1,29 @@
 import plotly.graph_objs as go
+import plotly
 from service.data_analysis.get_issue_senti_pct import get_issue_pos_pct, get_issue_neg_pct
-import datetime
-import math
+from utils.DateUtil import convert_to_iso8601
+import json
 
 
-def plot_pct_over_time(repo_name, start_time, end_time):
+# intervals参数详见utils.get_plot_intervals
+# 关于返回图像：
+# 首先使用 `json.dumps()` 方法将 `go.Figure` 对象转换为 JSON 格式的字符串
+# 并使用 Flask 的 `render_template` 方法将这个字符串作为参数传递给前端模板。
+# 在前端模板中，可以使用 JavaScript 或其他前端框架来解析 JSON 并渲染图表。
+def repo_gen_pct_change(repo_name, start_time, end_time, intervals):
     if get_issue_pos_pct(repo_name, start_time, end_time) != f"该时间段内，{repo_name} issue为空！":
-        # 准备数据，将总体之间划分为指定间隔，假设为固定的8个间隔
-        # 计算日期间隔的总天数
-        time_interval = start_time - end_time
-        total_days = time_interval.days
-        # 计算每个区间的天数
-        interval_days = math.ceil(total_days / 8)
-        # 计算每个区间的起始日期和结束日期
-        current_date = start_time
-        intervals = []
-        for i in range(8):
-            interval_start = current_date
-            interval_end = current_date + datetime.timedelta(days=interval_days)
-            intervals.append((interval_start, interval_end))
-            current_date = interval_end
-
-        # 如果最后一个区间的结束日期不等于总日期间隔的结束日期，则将最后一个区间的结束日期设置为总日期间隔的结束日期
-        if intervals[-1][1] != end_time:
-            intervals[-1] = (intervals[-1][0], end_time)
         index = []
         for i in range(8):
-            index.append(str(intervals[i][0]) + '~' + str(intervals[i][1]))
+            index.append(str(intervals[i]) + '~' + str(intervals[i + 1]))
         # 定义空数组用于保存结果
         pos_list = []
         neg_list = []
         # 循环遍历这些时间点
         for i in range(8):
-            start_t = intervals[i][0]
-            end_t = intervals[i][1]
-            pos_list.append(get_issue_pos_pct(repo_name, start_t, end_t))
-            neg_list.append(get_issue_neg_pct(repo_name, start_t, end_t))
+            start_t = intervals[i]
+            end_t = intervals[i + 1]
+            pos_list.append(get_issue_pos_pct(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t)))
+            neg_list.append(get_issue_neg_pct(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t)))
 
         # 创建两条折线，基计得分和消极得分
         trace1 = go.Scatter(
@@ -52,10 +40,11 @@ def plot_pct_over_time(repo_name, start_time, end_time):
         )
         # 设置图表布局
         layout = go.Layout(
-            title='情绪文本占比波动图',
+            title='项目情绪文本占比波动图',
             xaxis=dict(title='Date'),
             yaxis=dict(title='Score')
         )
         # 绘制图表
         fig = go.Figure(data=[trace1, trace2], layout=layout)
-        fig.show()
+        # fig.show()
+        return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
