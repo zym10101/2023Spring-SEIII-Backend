@@ -1,6 +1,6 @@
-from dao import IssueDao
+def get_issue_senti_pct_by_label(repo, label, start_time, end_time, polarity):
+    return []
 
 
-def get_labels(repo_name, start_time, end_time):
-    labels = IssueDao.get_labels(repo_name, start_time, end_time)
-    print(labels)
+def get_comment_senti_pct_by_label(repo, label, start_time, end_time, polarity):
+    return []
