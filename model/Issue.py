@@ -166,9 +166,3 @@ class Issue(db.Model):
         for issue in session.query(Issue):
             yield issue
 
-    @staticmethod
-    def read_by_time_range(session, start_time, end_time):
-        return session.query(Issue) \
-            .filter(Issue.created_at >= start_time) \
-            .filter(Issue.created_at <= end_time) \
-            .order_by(Issue.created_at.desc())

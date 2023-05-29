@@ -1,3 +1,5 @@
+from sqlalchemy import distinct, or_
+
 from dao.Database import db
 from model.User import User
 from model.Issue import Issue
@@ -47,6 +49,23 @@ def get_by_create_time_page(repo_name, begin_time, end_time, page_number, page_s
         .filter(Issue.created_at.between(begin_time, end_time)) \
         .paginate(page=page_number, per_page=page_size)
     return pagination.items
+
+
+def get_by_row(repo_name):
+    for issue in Issue.query.filter(Issue.repository_url.endswith(repo_name)):
+        yield issue
+
+
+def get_labels(repo_name, begin_time, end_time):
+    labels_list = [issue.labels for issue in Issue.query \
+        .filter(Issue.repository_url.endswith(repo_name)) \
+        .filter(Issue.created_at.between(begin_time, end_time)) \
+        .all()]
+    labels = list(set(element for sublist in labels_list for element in sublist))
+    label_id = [label.id for label in labels]
+    labels = Label.query.filter(or_(*[Label.id == id for id in label_id])).with_entities(Label.name).all()
+    label_names = list(set([label.name for label in labels]))
+    return label_names
 
 
 def template():
