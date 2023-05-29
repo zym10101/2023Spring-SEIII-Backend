@@ -10,7 +10,7 @@ import json
 # 首先使用 `json.dumps()` 方法将 `go.Figure` 对象转换为 JSON 格式的字符串
 # 并使用 Flask 的 `render_template` 方法将这个字符串作为参数传递给前端模板。
 # 在前端模板中，可以使用 JavaScript 或其他前端框架来解析 JSON 并渲染图表。
-def repo_gen_pct_change(repo_name, start_time, end_time, intervals):
+def repo_issue_pct_change(repo_name, start_time, end_time, intervals):
     if get_issue_pos_pct(repo_name, start_time, end_time) != f"该时间段内，{repo_name} issue为空！":
         index = []
         for i in range(8):
