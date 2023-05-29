@@ -28,7 +28,7 @@ def get_issue_pct(repo_name, start_time, end_time, polarity):
 
 def get_issue_pos_pct(repo_name, start_time, end_time):
     pct = get_issue_pct(repo_name, start_time, end_time, "pos")
-    if pct.startswith("该时间段内"):
+    if str(pct).startswith("该时间段内"):
         return f"该时间段内，{repo_name} issue为空！"
     else:
         return pct
@@ -36,7 +36,7 @@ def get_issue_pos_pct(repo_name, start_time, end_time):
 
 def get_issue_neg_pct(repo_name, start_time, end_time):
     pct = get_issue_pct(repo_name, start_time, end_time, "neg")
-    if pct.startswith("该时间段内"):
+    if str(pct).startswith("该时间段内"):
         return f"该时间段内，{repo_name} issue为空！"
     else:
         return pct

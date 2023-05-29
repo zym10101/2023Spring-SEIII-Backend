@@ -11,13 +11,13 @@ from utils.plot_pct_change import plot_pct_change
 def repo_issue_pct_change(repo_name, start_time, end_time, intervals):
     if get_issue_pos_pct(repo_name, start_time, end_time) != f"该时间段内，{repo_name} issue为空！":
         index = []
-        for i in range(len(intervals)):
+        for i in range(len(intervals)-1):
             index.append(str(intervals[i]) + '~' + str(intervals[i + 1]))
         # 定义空数组用于保存结果
         pos_list = []
         neg_list = []
         # 循环遍历这些时间点
-        for i in range(len(intervals)):
+        for i in range(len(intervals)-1):
             start_t = intervals[i]
             end_t = intervals[i + 1]
             pos_list.append(get_issue_pos_pct(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t)))

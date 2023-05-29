@@ -12,7 +12,7 @@ def get_plot_intervals(start_time, end_time, freq=None, periods=8):
     if freq is not None:
         intervals = pd.date_range(start=start_time, end=end_time, freq=freq).tolist()
     else:
-        intervals = pd.date_range(start=start_time, end=end_time, periods=periods+1).tolist()[1:]
+        intervals = pd.date_range(start=start_time, end=end_time, periods=periods+1).tolist()
     dates = pd.DatetimeIndex(intervals).date.tolist()
     return [d.strftime('%Y-%m-%d') for d in dates]
 
