@@ -1,4 +1,4 @@
-from service.data_analysis.get_issue_senti_pct import get_issue_pos_pct, get_issue_neg_pct
+from service.data_analysis.get_issue_senti_pct import get_issue_pct_by_time
 from service.data_analysis.get_comment_senti_pct import get_comment_pct_by_time
 from utils.DateUtil import convert_to_iso8601
 from utils.plot_pct_change import plot_pct_change
@@ -11,7 +11,7 @@ from utils.plot_pct_change import plot_pct_change
 # 并使用 Flask 的 `render_template` 方法将这个字符串作为参数传递给前端模板。
 # 在前端模板中，可以使用 JavaScript 或其他前端框架来解析 JSON 并渲染图表。
 def plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals):
-    if get_issue_pos_pct(repo_name, start_time, end_time) != f"该时间段内，{repo_name} issue为空！":
+    if get_issue_pct_by_time(repo_name, start_time, end_time, 'pos') != f"该时间段内，{repo_name} issue为空！":
         index = []
         for i in range(len(intervals)-1):
             index.append(str(intervals[i]) + '~' + str(intervals[i + 1]))
@@ -22,8 +22,8 @@ def plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals):
         for i in range(len(intervals)-1):
             start_t = intervals[i]
             end_t = intervals[i + 1]
-            pos_list.append(get_issue_pos_pct(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t)))
-            neg_list.append(get_issue_neg_pct(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t)))
+            pos_list.append(get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos'))
+            neg_list.append(get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg'))
 
         return plot_pct_change(index, pos_list, neg_list, '项目issue情绪文本占比波动图', 'Date')
 
