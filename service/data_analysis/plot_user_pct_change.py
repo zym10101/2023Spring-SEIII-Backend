@@ -1,7 +1,6 @@
 from service.data_analysis.get_comment_senti_pct import get_comment_pct_by_time
 from service.data_analysis.get_senti_pct_by_user import get_issue_senti_pct_by_user, get_comment_senti_pct_by_user
 from utils.DateUtil import convert_to_iso8601
-from utils.plot_pct_change import plot_pct_change
 
 
 def plot_user_issue_pct_change(repo_name, user, intervals):
@@ -18,7 +17,7 @@ def plot_user_issue_pct_change(repo_name, user, intervals):
         pos_list.append(get_issue_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos'))
         neg_list.append(get_issue_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg'))
 
-    return plot_pct_change(index, pos_list, neg_list, '用户issue情绪文本占比波动图', 'Date')
+    return index, pos_list, neg_list, '用户issue情绪文本占比波动图', 'Date'
 
 
 def plot_user_comment_pct_change(repo_name, user, intervals):
@@ -37,4 +36,4 @@ def plot_user_comment_pct_change(repo_name, user, intervals):
         neg_list.append(
             get_comment_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg'))
 
-    return plot_pct_change(index, pos_list, neg_list, '用户comment情绪文本占比波动图', 'Date')
+    return index, pos_list, neg_list, '用户comment情绪文本占比波动图', 'Date'

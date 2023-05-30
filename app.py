@@ -7,8 +7,9 @@ import concurrent.futures
 from flask import Flask, render_template, request, jsonify
 import threading
 
-# 导入database
+# 导入dao层相关内容
 from dao.Database import db
+from dao.LabelDao import get_labels_8, get_labels
 
 # 导入所需model
 from model.User import User
@@ -19,6 +20,10 @@ from model.Account import Account
 
 # 导入service层相关内容
 from service.data_analysis.body_washer_and_cal import body_washer_and_cal
+from service.data_analysis.plot_lable_pct_change import plot_issue_pct_change_by_label
+from service.data_analysis.plot_reaction_pct import plot_issue_reaction_pct, plot_comment_reaction_pct
+from service.data_analysis.plot_repo_pct_change import plot_repo_issue_pct_change, plot_repo_comment_pct_change
+from service.data_analysis.plot_user_pct_change import plot_user_comment_pct_change, plot_user_issue_pct_change
 from service.scraper.GitHubScraper import GitHubScraper
 from service.scraper.Params import Params
 from utils.Email import send_crawling_completed
@@ -285,7 +290,6 @@ def crawling():
 # 同时爬取一个仓库的所有issue和comment，然后做关联
 @app.route("/crawling/new", methods=["POST"])
 def crawling_new():
-
     def crawl_comments(repo_name_, params_, max_page=20):
         with app.app_context():
             scraper.crawling_only_comments(repo_name_, params_, max_page)
@@ -330,6 +334,7 @@ def crawling_new():
     print("函数执行时间：", elapsed_time, "秒")
 
     start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
+
     send_crawling_completed(to_email, repo_name, start_time)
 
     return "success"
@@ -358,6 +363,9 @@ def crawling_issue():
     end = time.time()  # 记录函数结束时间
     elapsed_time = end - start  # 计算函数执行时间
     print("函数执行时间：", elapsed_time, "秒")
+
+    # 计算情绪值，只会对新增数据进行情绪值计算
+    body_washer_and_cal(db)
 
     start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
     send_crawling_completed(to_email, repo_name, start_time)
@@ -395,6 +403,138 @@ def crawling_comment():
     return iss
 
 
+# 请求：http://127.0.0.1:5000/cal-senti
+# 逻辑已经加到了crawling_issue中，此接口仅作备用
+# 分析issue_body和comment_body的情绪值并存入数据库
+# 如果新爬取了数据，只会对新增数据进行情绪值计算
+@app.route("/cal-senti")
+def issue_cal_senti():
+    body_washer_and_cal(db)
+    return f"情绪值分析完毕"
+
+
+# 随着app的启动，开启jvm，保证只开启这一个jvm
+# python进程关闭时，会自动关闭
+jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
+
+
+# 请求：http://127.0.0.1:5000/get-issue-labels
+# 获取某一项目的某一时间段内issue所有的label的name列表
+@app.route("/get-issue-labels", methods=["GET"])
+def get_issue_labels():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    return get_labels(repo_name, start_time, end_time)
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/issue/label
+# 根据label，获取拥有该label的issue的情绪值占比
+@app.route("/analyse/pie/issue/label", methods=["GET"])
+def draw_issue_pct_change_by_label():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    labels = data.get('labels', None)
+    return plot_issue_pct_change_by_label(repo_name, start_time, end_time, labels)
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/comment/label
+# 根据label，获取拥有该label的issue的comment的情绪值占比
+@app.route("/analyse/pie/comment/label", methods=["GET"])
+def draw_comment_pct_change_by_label():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    labels = data.get('labels', None)
+    return plot_issue_pct_change_by_label(repo_name, start_time, end_time, labels)
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/issue/reaction
+# 根据每种reaction，计算拥有这种reaction的issue的情绪值占比
+@app.route("/analyse/pie/issue/reaction", methods=["GET"])
+def draw_issue_pct_change_by_reaction():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    return plot_issue_reaction_pct(repo_name, start_time, end_time)
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/comment/reaction
+# 根据每种reaction，计算拥有这种reaction的issue的comment的情绪值占比
+@app.route("/analyse/pie/comment/reaction", methods=["GET"])
+def draw_comment_pct_change_by_reaction():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    return plot_comment_reaction_pct(repo_name, start_time, end_time)
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/all
+# 获取某一项目的某一时间段内整体情绪分布
+@app.route("/analyse/pie/all", methods=["GET"])
+def draw_all_pct_change():
+    # TODO
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/issue
+# 获取某一项目的某一时间段内issue情绪分布
+@app.route("/analyse/pie/issue", methods=["GET"])
+def draw_issue_pct_change():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    intervals = data.get('intervals', '')
+    return plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals)
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/comment
+# 获取某一项目的某一时间段内issue的comment的情绪分布
+@app.route("/analyse/pie/comment", methods=["GET"])
+def draw_comment_pct_change():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    intervals = data.get('intervals', '')
+    return plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals)
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/all/user
+# 获取某用户某一时间段内发布的issue和comment整体情绪分布
+@app.route("/analyse/pie/all/user", methods=["GET"])
+def draw_all_pct_change_by_user():
+    # TODO
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/issue/user
+# 获取某一项目时间段内某个user发布的issue情绪分布
+@app.route("/analyse/pie/issue/user", methods=["GET"])
+def draw_issue_pct_change_by_user():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    user = str(data.get('user', ''))
+    intervals = data.get('intervals', '')
+    return plot_user_issue_pct_change(repo_name, user, intervals)
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/comment/user
+# 获取某一项目时间段内某个user发布的comment的情绪分布
+@app.route("/analyse/pie/comment/user", methods=["GET"])
+def draw_comment_pct_change_by_user():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    user = str(data.get('user', ''))
+    intervals = data.get('intervals', '')
+    return plot_user_comment_pct_change(repo_name, user, intervals)
+
+
 # # 请求：http://127.0.0.1:5000/get-and-save-db
 # # 在爬取issue的同时完成对响应comments的爬取
 # @app.route("/get-and-save-db")
@@ -418,16 +558,6 @@ def crawling_comment():
 #     iss = s.get_and_save(repo_name=repo, per_page=2)
 #     return f"数据保存到csv成功! 请前往项目根目录下{path}查看"
 
-
-# 请求：http://127.0.0.1:5000/issue/cal-Senti
-@app.route("/issue/cal-Senti")
-def issue_cal_Senti():
-    body_washer_and_cal(db)
-    return f"情绪值分析完毕"
-
-
-# 随着app的启动，开启jvm，保证只开启这一个jvm
-jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
 
 # @app.route("/email", methods=["POST"])
 # def email():

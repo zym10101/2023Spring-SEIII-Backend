@@ -1,7 +1,6 @@
 from service.data_analysis.get_issue_senti_pct import get_issue_pct_by_time
 from service.data_analysis.get_comment_senti_pct import get_comment_pct_by_time
 from utils.DateUtil import convert_to_iso8601
-from utils.plot_pct_change import plot_pct_change
 
 
 # TODO start_time, end_time使用了convert_to_iso8601方法，输入类型与该方法一致；如果dao层时间类型非iso8601则修改
@@ -25,7 +24,7 @@ def plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals):
             pos_list.append(get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos'))
             neg_list.append(get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg'))
 
-        return plot_pct_change(index, pos_list, neg_list, '项目issue情绪文本占比波动图', 'Date')
+        return index, pos_list, neg_list, '项目issue情绪文本占比波动图', 'Date'
 
 
 def plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals):
@@ -43,4 +42,4 @@ def plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals):
             pos_list.append(get_comment_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos'))
             neg_list.append(get_comment_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg'))
 
-        return plot_pct_change(index, pos_list, neg_list, '项目issue情绪文本占比波动图', 'Date')
+        return index, pos_list, neg_list, '项目issue情绪文本占比波动图', 'Date'
