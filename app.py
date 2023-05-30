@@ -242,6 +242,15 @@ def user_info():
 #     return iss
 
 
+# 获取仓库最早issue时间
+@app.route("/issue/earliest")
+def issue_earliest():
+    repo_name = request.args.get("repo", default="", type=str)
+    scraper = GitHubScraper(access_token=ACCESS_TOKEN)
+    params = Params()
+    return scraper.get_earliest_date(repo_name, params.to_dict())
+
+
 # 在爬取issue的同时完成对响应comments的爬取
 @app.route("/crawling", methods=["POST"])
 def crawling():

@@ -46,6 +46,19 @@ class GitHubScraper:
             print(f"Request failed with status code: {response.status_code}")
         return 0
 
+    def get_earliest_date(self, repo_name, params):
+        """
+        获取仓库最早issue实践
+        :param repo_name: 本次任务中其中一次请求的url
+        :param params: 参数字典
+        :return: 本次任务共需要请求的总页数
+        """
+        url = self.issues_url_template.format(repo_name)
+        last_page_num = self._get_total_pages(url, params)
+        params["page"] = last_page_num
+        issue_json = self.crawling(url, params)[-1]
+        return issue_json['created_at']
+
     # async def crawling(self, url, params):
     #     async with aiohttp.ClientSession() as session:
     #         async with session.get(url, headers=self.headers, params=params) as response:
@@ -121,7 +134,7 @@ class GitHubScraper:
         total_page_num = self._get_total_pages(issues_url, params)
         result = []
         print('共有{}页数据'.format(total_page_num))
-        for page_no in range(1, min(6, total_page_num + 1)):
+        for page_no in range(1, min(11, total_page_num + 1)):
             print('正在爬取第{}页'.format(page_no))
             params['page'] = page_no
             issues_json = self.crawling(issues_url, params)
