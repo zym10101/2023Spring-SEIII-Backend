@@ -86,7 +86,7 @@ class GitHubScraper:
     def crawling_only_issues(self, repo_name, params, max_page=10):
         issues_url = self.issues_url_template.format(repo_name)
         total_page_num = self._get_total_pages(issues_url, params)
-        print('共有{}页数据'.format(total_page_num))
+        print('共有{}页Issue数据'.format(total_page_num))
         for page_no in range(1, min(max_page + 1, total_page_num + 1)):
             print('正在爬取第{}页'.format(page_no))
             params['page'] = page_no
@@ -97,13 +97,18 @@ class GitHubScraper:
     def crawling_only_comments(self, repo_name, params, max_page=10):
         comments_url = self.comments_url_template.format(repo_name)
         total_page_num = self._get_total_pages(comments_url, params)
-        print('共有{}页数据'.format(total_page_num))
+        print('共有{}页Comment数据'.format(total_page_num))
         for page_no in range(1, min(max_page + 1, total_page_num + 1)):
             print('正在爬取第{}页'.format(page_no))
             params['page'] = page_no
             comments_json_list = self.crawling(comments_url, params)
             CommentDao.save_list(comments_json_list)
         return "success"
+
+    @staticmethod
+    def create_association(repo_name):
+        print('正在对{}仓库Issue与Comment建立连接'.format(repo_name))
+        IssueDao.create_association(repo_name)
 
     # async def crawling(self, url, params):
     #     async with aiohttp.ClientSession() as session:
