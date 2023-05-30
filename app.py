@@ -5,6 +5,7 @@ import jpype
 from dotenv import load_dotenv
 import concurrent.futures
 from flask import Flask, render_template, request, jsonify
+import threading
 
 # 导入database
 from dao.Database import db
@@ -284,6 +285,15 @@ def crawling():
 # 同时爬取一个仓库的所有issue和comment，然后做关联
 @app.route("/crawling/new", methods=["POST"])
 def crawling_new():
+
+    def crawl_comments(repo_name_, params_, max_page=20):
+        with app.app_context():
+            scraper.crawling_only_comments(repo_name_, params_, max_page)
+
+    def crawl_issues(repo_name_, params_, max_page=20):
+        with app.app_context():
+            scraper.crawling_only_issues(repo_name_, params_, max_page)
+
     start = time.time()  # 记录函数开始时间
 
     data = json.loads(request.data)
@@ -299,8 +309,20 @@ def crawling_new():
     if until != '':
         params.add_param('until', DateUtil.convert_to_iso8601(until))
     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
-    scraper.crawling_only_comments(repo_name, params.to_dict(), max_page=10)
-    scraper.crawling_only_issues(repo_name, params.to_dict(), max_page=10)
+
+    # scraper.crawling_only_comments(repo_name, params.to_dict(), max_page=10)
+    # scraper.crawling_only_issues(repo_name, params.to_dict(), max_page=10)
+    # 创建线程对象
+    comments_thread = threading.Thread(target=crawl_comments, args=(repo_name, params.to_dict(), 20))
+    issues_thread = threading.Thread(target=crawl_issues, args=(repo_name, params.to_dict(), 20))
+    # 启动线程
+    comments_thread.start()
+    issues_thread.start()
+    # 等待线程执行完毕
+    comments_thread.join()
+    issues_thread.join()
+
+    # 两个任务都结束后做关联
     scraper.create_association(repo_name)
 
     end = time.time()  # 记录函数结束时间
