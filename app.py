@@ -281,6 +281,66 @@ def crawling():
     return iss
 
 
+# 仅爬取issue
+@app.route("/crawling/issue", methods=["POST"])
+def crawling_issue():
+    start = time.time()  # 记录函数开始时间
+
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo', ''))
+    since = str(data.get('since', ''))
+    until = str(data.get('until', ''))
+    to_email = str(data.get('email', ''))
+    if repo_name == '':
+        return "项目名称不能为空！"
+    params = Params()
+    if since != '':
+        params.add_param('since', DateUtil.convert_to_iso8601(since))
+    if until != '':
+        params.add_param('until', DateUtil.convert_to_iso8601(until))
+    scraper = GitHubScraper(access_token=ACCESS_TOKEN)
+    iss = scraper.crawling_only_issues(repo_name, params.to_dict())
+
+    end = time.time()  # 记录函数结束时间
+    elapsed_time = end - start  # 计算函数执行时间
+    print("函数执行时间：", elapsed_time, "秒")
+
+    start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
+    send_crawling_completed(to_email, repo_name, start_time)
+
+    return iss
+
+
+# 仅爬取comment
+@app.route("/crawling/comment", methods=["POST"])
+def crawling_comment():
+    start = time.time()  # 记录函数开始时间
+
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo', ''))
+    since = str(data.get('since', ''))
+    until = str(data.get('until', ''))
+    to_email = str(data.get('email', ''))
+    if repo_name == '':
+        return "项目名称不能为空！"
+    params = Params()
+    if since != '':
+        params.add_param('since', DateUtil.convert_to_iso8601(since))
+    if until != '':
+        params.add_param('until', DateUtil.convert_to_iso8601(until))
+    scraper = GitHubScraper(access_token=ACCESS_TOKEN)
+    iss = scraper.crawling_only_comments(repo_name, params.to_dict())
+
+    end = time.time()  # 记录函数结束时间
+    elapsed_time = end - start  # 计算函数执行时间
+    print("函数执行时间：", elapsed_time, "秒")
+
+    start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
+    send_crawling_completed(to_email, repo_name, start_time)
+
+    return iss
+
+
 # # 请求：http://127.0.0.1:5000/get-and-save-db
 # # 在爬取issue的同时完成对响应comments的爬取
 # @app.route("/get-and-save-db")

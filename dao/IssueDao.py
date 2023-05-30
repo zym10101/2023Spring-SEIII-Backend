@@ -14,9 +14,10 @@ def save_single(json):
     for label_ in json['labels']:
         labels_.append(Label(label_))
     issue_comments_ = []
-    for comment_ in json['comments_json']:
-        issue_comments_.append(Comment(comment_))
-        users_.append(User(comment_['user']))
+    if 'comments_json' in json.keys():
+        for comment_ in json['comments_json']:
+            issue_comments_.append(Comment(comment_))
+            users_.append(User(comment_['user']))
 
     # 2.创建 issue ORM对象
     issue_ = Issue(json)
@@ -30,6 +31,11 @@ def save_single(json):
 
     # 4.确认提交
     db.session.commit()
+
+
+def save_list(json_list):
+    for json in json_list:
+        save_single(json)
 
 
 def get_by_repository(repo_name):
