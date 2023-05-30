@@ -5,6 +5,7 @@ import jpype
 from dotenv import load_dotenv
 import concurrent.futures
 from flask import Flask, render_template, request, jsonify
+import threading
 
 # 导入database
 from dao.Database import db
@@ -270,6 +271,119 @@ def crawling():
         params.add_param('until', DateUtil.convert_to_iso8601(until))
     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
     iss = scraper.crawling_issues_and_comments(repo_name, params.to_dict())
+
+    end = time.time()  # 记录函数结束时间
+    elapsed_time = end - start  # 计算函数执行时间
+    print("函数执行时间：", elapsed_time, "秒")
+
+    start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
+    send_crawling_completed(to_email, repo_name, start_time)
+
+    return iss
+
+
+# 同时爬取一个仓库的所有issue和comment，然后做关联
+@app.route("/crawling/new", methods=["POST"])
+def crawling_new():
+
+    def crawl_comments(repo_name_, params_, max_page=20):
+        with app.app_context():
+            scraper.crawling_only_comments(repo_name_, params_, max_page)
+
+    def crawl_issues(repo_name_, params_, max_page=20):
+        with app.app_context():
+            scraper.crawling_only_issues(repo_name_, params_, max_page)
+
+    start = time.time()  # 记录函数开始时间
+
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo', ''))
+    since = str(data.get('since', ''))
+    until = str(data.get('until', ''))
+    to_email = str(data.get('email', ''))
+    if repo_name == '':
+        return "项目名称不能为空！"
+    params = Params()
+    if since != '':
+        params.add_param('since', DateUtil.convert_to_iso8601(since))
+    if until != '':
+        params.add_param('until', DateUtil.convert_to_iso8601(until))
+    scraper = GitHubScraper(access_token=ACCESS_TOKEN)
+
+    # scraper.crawling_only_comments(repo_name, params.to_dict(), max_page=10)
+    # scraper.crawling_only_issues(repo_name, params.to_dict(), max_page=10)
+    # 创建线程对象
+    comments_thread = threading.Thread(target=crawl_comments, args=(repo_name, params.to_dict(), 20))
+    issues_thread = threading.Thread(target=crawl_issues, args=(repo_name, params.to_dict(), 20))
+    # 启动线程
+    comments_thread.start()
+    issues_thread.start()
+    # 等待线程执行完毕
+    comments_thread.join()
+    issues_thread.join()
+
+    # 两个任务都结束后做关联
+    scraper.create_association(repo_name)
+
+    end = time.time()  # 记录函数结束时间
+    elapsed_time = end - start  # 计算函数执行时间
+    print("函数执行时间：", elapsed_time, "秒")
+
+    start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
+    send_crawling_completed(to_email, repo_name, start_time)
+
+    return "success"
+
+
+# 仅爬取issue
+@app.route("/crawling/issue", methods=["POST"])
+def crawling_issue():
+    start = time.time()  # 记录函数开始时间
+
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo', ''))
+    since = str(data.get('since', ''))
+    until = str(data.get('until', ''))
+    to_email = str(data.get('email', ''))
+    if repo_name == '':
+        return "项目名称不能为空！"
+    params = Params()
+    if since != '':
+        params.add_param('since', DateUtil.convert_to_iso8601(since))
+    if until != '':
+        params.add_param('until', DateUtil.convert_to_iso8601(until))
+    scraper = GitHubScraper(access_token=ACCESS_TOKEN)
+    iss = scraper.crawling_only_issues(repo_name, params.to_dict())
+
+    end = time.time()  # 记录函数结束时间
+    elapsed_time = end - start  # 计算函数执行时间
+    print("函数执行时间：", elapsed_time, "秒")
+
+    start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
+    send_crawling_completed(to_email, repo_name, start_time)
+
+    return iss
+
+
+# 仅爬取comment
+@app.route("/crawling/comment", methods=["POST"])
+def crawling_comment():
+    start = time.time()  # 记录函数开始时间
+
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo', ''))
+    since = str(data.get('since', ''))
+    until = str(data.get('until', ''))
+    to_email = str(data.get('email', ''))
+    if repo_name == '':
+        return "项目名称不能为空！"
+    params = Params()
+    if since != '':
+        params.add_param('since', DateUtil.convert_to_iso8601(since))
+    if until != '':
+        params.add_param('until', DateUtil.convert_to_iso8601(until))
+    scraper = GitHubScraper(access_token=ACCESS_TOKEN)
+    iss = scraper.crawling_only_comments(repo_name, params.to_dict())
 
     end = time.time()  # 记录函数结束时间
     elapsed_time = end - start  # 计算函数执行时间

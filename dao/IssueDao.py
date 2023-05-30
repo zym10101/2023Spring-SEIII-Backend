@@ -1,5 +1,5 @@
 from sqlalchemy import *
-
+import re
 from dao.Database import db
 from model.User import User
 from model.Issue import Issue
@@ -14,9 +14,10 @@ def save_single(json):
     for label_ in json['labels']:
         labels_.append(Label(label_))
     issue_comments_ = []
-    for comment_ in json['comments_json']:
-        issue_comments_.append(Comment(comment_))
-        users_.append(User(comment_['user']))
+    if 'comments_json' in json.keys():
+        for comment_ in json['comments_json']:
+            issue_comments_.append(Comment(comment_))
+            users_.append(User(comment_['user']))
 
     # 2.创建 issue ORM对象
     issue_ = Issue(json)
@@ -29,6 +30,24 @@ def save_single(json):
     db.session.merge(issue_)
 
     # 4.确认提交
+    db.session.commit()
+
+
+def save_list(json_list):
+    for json in json_list:
+        save_single(json)
+
+
+def create_association(repo_name):
+    # 根据 repo_name 查询 Issue 表
+    issues = Issue.query.filter(Issue.repository_url.endswith(repo_name)).all()
+
+    for issue in issues:
+        comments_url = issue.comments_url
+        issue_number = re.search(r'/(\d+)/comments', comments_url).group(1)
+        issue.issue_comments = Comment.query.filter(Comment.issue_url.endswith(issue_number)).all()
+
+    # 保存修改到数据库
     db.session.commit()
 
 
@@ -104,9 +123,10 @@ if __name__ == '__main__':
     from datetime import datetime
 
     with app.app_context():
-        begin = datetime(2023, 3, 15)
-        end = datetime(2023, 3, 17)
-        result = get_by_create_time_page('flink', begin, end, 2, 5)
-        for each in result:
-            print(each.id)
-        print('查询到{}条'.format(len(result)))
+        create_association('apache/tomcat')
+        # begin = datetime(2023, 3, 15)
+        # end = datetime(2023, 3, 17)
+        # result = get_by_create_time_page('flink', begin, end, 2, 5)
+        # for each in result:
+        #     print(each.id)
+        # print('查询到{}条'.format(len(result)))
