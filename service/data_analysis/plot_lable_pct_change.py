@@ -9,13 +9,19 @@ def plot_issue_pct_change_by_label(repo, start_time, end_time, labels=None):
         labels = get_labels_8(repo, start_time, end_time)
     pos_list = []
     neg_list = []
+    neu_list = []
     for label in labels:
-        pos_list.append(get_issue_senti_pct_by_label(
-            repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'pos'))
-        neg_list.append(get_issue_senti_pct_by_label(
-            repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg'))
+        pos = get_issue_senti_pct_by_label(
+            repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'pos')
+        neg = get_issue_senti_pct_by_label(
+            repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg')
+        neu = 1 - pos - neg
+        pos_list.append(pos)
+        neg_list.append(neg)
+        neu_list.append(neu)
 
-    return [labels, pos_list, neg_list, 'issue的labels情绪文本占比图', 'Labels']
+    return [labels, pos_list, neu_list, neg_list, 'Labels']
+    # return [labels, pos_list, neu_list, neg_list, 'issue的labels情绪文本占比图', 'Labels']
 
 
 def plot_comment_pct_change_by_label(repo, start_time, end_time, labels=None):
@@ -23,10 +29,16 @@ def plot_comment_pct_change_by_label(repo, start_time, end_time, labels=None):
         labels = get_labels_8(repo, start_time, end_time)
     pos_list = []
     neg_list = []
+    neu_list = []
     for label in labels:
-        pos_list.append(get_comment_senti_pct_by_label(
-            repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'pos'))
-        neg_list.append(get_comment_senti_pct_by_label(
-            repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg'))
+        pos = get_comment_senti_pct_by_label(
+            repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'pos')
+        neg = get_comment_senti_pct_by_label(
+            repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg')
+        neu = 1 - pos - neg
+        pos_list.append(pos)
+        neg_list.append(neg)
+        neu_list.append(neu)
 
-    return [labels, pos_list, neg_list, 'comment的labels情绪文本占比图', 'Labels']
+    return [labels, pos_list, neu_list, neg_list, 'Labels']
+    # return [labels, pos_list, neu_list, neg_list, 'comment的labels情绪文本占比图', 'Labels']
