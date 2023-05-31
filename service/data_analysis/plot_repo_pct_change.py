@@ -25,12 +25,25 @@ def plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals):
             end_t = intervals[i + 1]
             pos = get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos')
             neg = get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
+            print(pos,neg)
+            # if not pos.isdigit() :
+            #     pos=0
+            #     neg=0
+            #     neu=0
+            # else:
             neu = 1 - pos - neg
             pos_list.append(pos)
             neg_list.append(neg)
             neu_list.append(neu)
 
-        return [index, pos_list, neu_list, neg_list, 'Date']
+        return {"title": "项目整体情绪分布图——issue",
+                "data":{
+                    "pos": pos_list,
+                    "neg": neg_list,
+                    "neu": neu_list,
+                    "xAxis": intervals
+                },
+                }
         # return [index, pos_list, neu_list, neg_list, '项目issue情绪文本占比波动图', 'Date']
 
 
@@ -54,7 +67,16 @@ def plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals):
             neg_list.append(neg)
             neu_list.append(neu)
 
-        return [index, pos_list, neu_list, neg_list, 'Date']
+        return {"title": "项目整体情绪分布图——comment",
+                # "data": [pos_list, neu_list, neg_list],
+                "data":{
+                    "pos": pos_list,
+                    "neg": neg_list,
+                    "neu": neu_list,
+                    "xAxis": intervals
+                },
+
+                }
         # return [index, pos_list, neu_list, neg_list, '项目issue comment情绪文本占比波动图', 'Date']
 
 

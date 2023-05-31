@@ -452,19 +452,24 @@ def draw_all_pct():
 # 项目issue情绪文本占比饼图
 @app.route("/analyse/pie/issue", methods=["GET"])
 def draw_issue_pct():
-    data = json.loads(request.data)
+    # print(request.data)
+    # data = json.loads(request.data)
+    data=request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
+    print(repo_name,start_time,end_time)
     intervals = [start_time, end_time]
-    return plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals)
+
+    return jsonify(plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals))
 
 
 # 请求：http://127.0.0.1:5000/analyse/pie/comment
 # 项目comment情绪文本占比饼图
 @app.route("/analyse/pie/comment", methods=["GET"])
 def draw_comment_pct():
-    data = json.loads(request.data)
+    # data = json.loads(request.data)
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -492,7 +497,9 @@ def draw_all_pct_change():
 # 项目issue情绪文本占比波动图
 @app.route("/analyse/line/issue", methods=["GET"])
 def draw_issue_pct_change():
-    data = json.loads(request.data)
+    print("line")
+    data = request.args
+    # data = json.loads(request.data)
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -506,7 +513,9 @@ def draw_issue_pct_change():
 # 项目comment情绪文本占比波动图
 @app.route("/analyse/line/comment", methods=["GET"])
 def draw_comment_pct_change():
-    data = json.loads(request.data)
+    print("line")
+    # data = json.loads(request.data)
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
