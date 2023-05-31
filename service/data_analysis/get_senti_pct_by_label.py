@@ -17,7 +17,4 @@ def get_comment_senti_pct_by_label(repo_name, label_name, begin_time, end_time, 
 
 def get_all_senti_pct_by_label(repo_name, label_name, begin_time, end_time, polarity, weighting):
     issues = dao.IssueDao.get_issues_by_label_name(repo_name, label_name, begin_time, end_time)
-    print(repo_name)
-    print(label_name)
-    print(issues)
     return get_all_senti_pct.get_all_pct(issues, polarity, weighting)
