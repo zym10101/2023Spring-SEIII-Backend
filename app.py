@@ -551,7 +551,7 @@ def get_issue_labels():
 # 请求：http://127.0.0.1:5000/get-most-used-labels
 # 获取某一项目的某一时间段内对应issue最多的8个label的name列表
 @app.route("/get-most-used-labels", methods=["GET"])
-def get_issue_labels():
+def get_most_used_labels():
     data=request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
