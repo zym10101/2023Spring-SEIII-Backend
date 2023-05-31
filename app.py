@@ -22,7 +22,8 @@ from model.Account import Account
 from service.data_analysis.body_washer_and_cal import body_washer_and_cal
 from service.data_analysis.plot_lable_pct_change import plot_issue_pct_change_by_label
 from service.data_analysis.plot_reaction_pct import plot_issue_reaction_pct, plot_comment_reaction_pct
-from service.data_analysis.plot_repo_pct_change import plot_repo_issue_pct_change, plot_repo_comment_pct_change
+from service.data_analysis.plot_repo_pct_change import plot_repo_issue_pct_change, plot_repo_comment_pct_change, \
+    plot_repo_all_pct_change
 from service.data_analysis.plot_user_pct_change import plot_user_comment_pct_change, plot_user_issue_pct_change
 from service.scraper.GitHubScraper import GitHubScraper
 from service.scraper.Params import Params
@@ -435,9 +436,16 @@ jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
 
 # 请求：http://127.0.0.1:5000/analyse/pie/all
 # 项目issue+comment情绪文本占比饼图
-# TODO
-# @app.route("/analyse/pie/all", methods=["GET"])
-# def draw_all_pct():
+# weighting: issue情绪值权重，默认为0.7
+@app.route("/analyse/pie/all", methods=["GET"])
+def draw_all_pct():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    weighting = data.get('weighting', 0.7)
+    intervals = [start_time, end_time]
+    return plot_repo_all_pct_change(repo_name, start_time, end_time, intervals, weighting)
 
 
 # 请求：http://127.0.0.1:5000/analyse/pie/issue
@@ -466,9 +474,18 @@ def draw_comment_pct():
 
 # 请求：http://127.0.0.1:5000/analyse/line/all
 # 项目issue+comment情绪文本占比波动图
-# TODO
-# @app.route("/analyse/line/all", methods=["GET"])
-# def draw_all_pct_change():
+# weighting: issue情绪值权重，默认为0.7
+@app.route("/analyse/line/all", methods=["GET"])
+def draw_all_pct_change():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    freq = data.get('freq', None)
+    periods = data.get('periods', 8)
+    weighting = data.get('weighting', 0.7)
+    intervals = get_plot_intervals(start_time, end_time, freq, periods)
+    return plot_repo_all_pct_change(repo_name, start_time, end_time, intervals, weighting)
 
 
 # 请求：http://127.0.0.1:5000/analyse/line/issue

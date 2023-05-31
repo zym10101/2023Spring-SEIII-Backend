@@ -1,3 +1,4 @@
+from service.data_analysis.get_all_senti_pct import get_all_pct_by_time
 from service.data_analysis.get_issue_senti_pct import get_issue_pct_by_time
 from service.data_analysis.get_comment_senti_pct import get_comment_pct_by_time
 from utils.DateUtil import convert_to_iso8601
@@ -12,14 +13,14 @@ from utils.DateUtil import convert_to_iso8601
 def plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals):
     if get_issue_pct_by_time(repo_name, start_time, end_time, 'pos') != f"该时间段内，{repo_name} issue为空！":
         index = []
-        for i in range(len(intervals)-1):
+        for i in range(len(intervals) - 1):
             index.append(str(intervals[i]) + '~' + str(intervals[i + 1]))
         # 定义空数组用于保存结果
         pos_list = []
         neg_list = []
         neu_list = []
         # 循环遍历这些时间点
-        for i in range(len(intervals)-1):
+        for i in range(len(intervals) - 1):
             start_t = intervals[i]
             end_t = intervals[i + 1]
             pos = get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos')
@@ -55,3 +56,29 @@ def plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals):
 
         return [index, pos_list, neu_list, neg_list, 'Date']
         # return [index, pos_list, neu_list, neg_list, '项目issue comment情绪文本占比波动图', 'Date']
+
+
+# weighting是issue权重
+def plot_repo_all_pct_change(repo_name, start_time, end_time, intervals, weighting):
+    if get_all_pct_by_time(repo_name, start_time, end_time, 'pos', weighting) != f"该时间段内，{repo_name} issue为空！":
+        index = []
+        for i in range(len(intervals) - 1):
+            index.append(str(intervals[i]) + '~' + str(intervals[i + 1]))
+        # 定义空数组用于保存结果
+        pos_list = []
+        neg_list = []
+        neu_list = []
+        # 循环遍历这些时间点
+        for i in range(len(intervals) - 1):
+            start_t = intervals[i]
+            end_t = intervals[i + 1]
+            pos = get_all_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos',
+                                      weighting)
+            neg = get_all_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg',
+                                      weighting)
+            neu = 1 - pos - neg
+            pos_list.append(pos)
+            neg_list.append(neg)
+            neu_list.append(neu)
+
+        return [index, pos_list, neu_list, neg_list, 'Date']
