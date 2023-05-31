@@ -547,6 +547,17 @@ def get_issue_labels():
     return get_labels(repo_name, start_time, end_time)
 
 
+# 请求：http://127.0.0.1:5000/get-most-used-labels
+# 获取某一项目的某一时间段内对应issue最多的8个label的name列表
+@app.route("/get-most-used-labels", methods=["GET"])
+def get_issue_labels():
+    data=request.args
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    return get_labels_8(repo_name, start_time, end_time)
+
+
 # 请求：http://127.0.0.1:5000/analyse/line/all/label
 # issue+comment的labels情绪文本占比图
 @app.route("/analyse/line/all/label", methods=["GET"])
