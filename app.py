@@ -168,27 +168,27 @@ def login():
         }), 200
 
 
-@app.route("/user/info", methods=["GET", "POST"])
-def user_info():
-    """
-    获取当前用户信息
-    :return:
-    """
-    token = request.headers.get("token")
-    if token == "666666":
-        return jsonify({
-            "code": 0,
-            "data": {
-                "id": "1",
-                "userName": "admin",
-                "realName": "张三",
-                "userType": 1
-            }
-        })
-    return jsonify({
-        "code": 99990403,
-        "msg": "token不存在或已过期"
-    })
+# @app.route("/user/info", methods=["GET", "POST"])
+# def user_info():
+#     """
+#     获取当前用户信息
+#     :return:
+#     """
+#     token = request.headers.get("token")
+#     if token == "666666":
+#         return jsonify({
+#             "code": 0,
+#             "data": {
+#                 "id": "1",
+#                 "userName": "admin",
+#                 "realName": "张三",
+#                 "userType": 1
+#             }
+#         })
+#     return jsonify({
+#         "code": 99990403,
+#         "msg": "token不存在或已过期"
+#     })
 
 
 # @app.route("/resp/add-single")
