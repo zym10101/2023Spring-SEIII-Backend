@@ -167,7 +167,7 @@ def login():
         }), 200
 
 
-@app.route("/user/info", methods=["POST", "POST"])
+@app.route("/user/info", methods=["GET", "POST"])
 def user_info():
     """
     获取当前用户信息
