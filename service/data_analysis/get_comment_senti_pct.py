@@ -6,7 +6,7 @@ def get_comment_pct_by_time(repo_name, start_time, end_time, polarity):
     issues = get_by_create_time_all(repo_name, start_time, end_time)
 
     if len(issues) == 0:
-        return f"该时间段内，{repo_name} issue为空！"
+        return -1
 
     pos_count = 0
     neg_count = 0
@@ -34,7 +34,7 @@ def get_comment_pct_by_issue(issue, polarity):
     comments = issue.issue_comments
 
     if len(comments) == 0:
-        return f"该issue的comment为空！"
+        return -1
 
     pos_count = 0
     neg_count = 0
@@ -58,7 +58,7 @@ def get_comment_pct_by_issue(issue, polarity):
 # 根据comment列表获取积极/消极情绪值占比
 def get_comment_pct(comments, polarity):
     if len(comments) == 0:
-        return f"comment为空！"
+        return -1
 
     pos_count = 0
     neg_count = 0

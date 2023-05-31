@@ -78,6 +78,16 @@ def get_by_row(repo_name):
 def get_issues_by_label_name(repo_name, label_name, begin_time, end_time):
     labels = Label.query.filter(Label.name == label_name).all()
     label_id = [label.id for label in labels]
+
+    # issues = Issue.query.all()
+    # for id in label_id:
+    #     for issue in issues:
+    #         issue_labels = issue.labels
+    #         for issue_label in issue_labels:
+    #             if issue_label.id == id:
+    #                 print(issue)
+
+
     issues = list(set(Issue.query.filter(Issue.labels.any(or_(*[Label.id == id for id in label_id]))) \
                       .filter(Issue.repository_url.endswith(repo_name)) \
                       .filter(Issue.created_at.between(begin_time, end_time)) \

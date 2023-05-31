@@ -20,11 +20,13 @@ from model.Account import Account
 
 # 导入service层相关内容
 from service.data_analysis.body_washer_and_cal import body_washer_and_cal
-from service.data_analysis.plot_lable_pct_change import plot_issue_pct_change_by_label
+from service.data_analysis.get_senti_pct_by_label import get_all_senti_pct_by_label
+from service.data_analysis.plot_lable_pct_change import plot_issue_pct_change_by_label, plot_all_pct_change_by_label
 from service.data_analysis.plot_reaction_pct import plot_issue_reaction_pct, plot_comment_reaction_pct
 from service.data_analysis.plot_repo_pct_change import plot_repo_issue_pct_change, plot_repo_comment_pct_change, \
     plot_repo_all_pct_change
-from service.data_analysis.plot_user_pct_change import plot_user_comment_pct_change, plot_user_issue_pct_change
+from service.data_analysis.plot_user_pct_change import plot_user_comment_pct_change, plot_user_issue_pct_change, \
+    plot_user_all_pct_change
 from service.scraper.GitHubScraper import GitHubScraper
 from service.scraper.Params import Params
 from utils.Email import send_crawling_completed
@@ -165,7 +167,7 @@ def login():
         }), 200
 
 
-@app.route("/user/info", methods=["GET", "POST"])
+@app.route("/user/info", methods=["POST", "POST"])
 def user_info():
     """
     获取当前用户信息
@@ -282,6 +284,9 @@ def crawling():
     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
     iss = scraper.crawling_issues_and_comments(repo_name, params.to_dict())
 
+    # 计算情绪值，只会对新增数据进行情绪值计算
+    body_washer_and_cal(db)
+
     end = time.time()  # 记录函数结束时间
     elapsed_time = end - start  # 计算函数执行时间
     print("函数执行时间：", elapsed_time, "秒")
@@ -334,6 +339,9 @@ def crawling_new():
     # 两个任务都结束后做关联
     scraper.create_association(repo_name)
 
+    # 计算情绪值，只会对新增数据进行情绪值计算
+    body_washer_and_cal(db)
+
     end = time.time()  # 记录函数结束时间
     elapsed_time = end - start  # 计算函数执行时间
     print("函数执行时间：", elapsed_time, "秒")
@@ -376,12 +384,12 @@ def crawling_issue():
     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
     iss = scraper.crawling_only_issues(repo_name, params.to_dict())
 
+    # 计算情绪值，只会对新增数据进行情绪值计算
+    body_washer_and_cal(db)
+
     end = time.time()  # 记录函数结束时间
     elapsed_time = end - start  # 计算函数执行时间
     print("函数执行时间：", elapsed_time, "秒")
-
-    # 计算情绪值，只会对新增数据进行情绪值计算
-    body_washer_and_cal(db)
 
     start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start))
     send_crawling_completed(to_email, repo_name, start_time)
@@ -408,6 +416,9 @@ def crawling_comment():
         params.add_param('until', DateUtil.convert_to_iso8601(until))
     scraper = GitHubScraper(access_token=ACCESS_TOKEN)
     iss = scraper.crawling_only_comments(repo_name, params.to_dict())
+
+    # 计算情绪值，只会对新增数据进行情绪值计算
+    body_washer_and_cal(db)
 
     end = time.time()  # 记录函数结束时间
     elapsed_time = end - start  # 计算函数执行时间
@@ -538,9 +549,15 @@ def get_issue_labels():
 
 # 请求：http://127.0.0.1:5000/analyse/line/all/label
 # issue+comment的labels情绪文本占比图
-# TODO
-# @app.route("/analyse/line/all/label", methods=["GET"])
-# def draw_all_pct_change_by_label():
+@app.route("/analyse/line/all/label", methods=["GET"])
+def draw_all_pct_change_by_label():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    weighting = data.get('weighting', 0.7)
+    labels = data.get('labels', None)
+    return plot_all_pct_change_by_label(repo_name, start_time, end_time, weighting, labels)
 
 
 # 请求：http://127.0.0.1:5000/analyse/line/issue/label
@@ -569,13 +586,6 @@ def draw_comment_pct_change_by_label():
 
 # 请求：http://127.0.0.1:5000/analyse/line/issue/reaction
 # issue的reaction情绪文本占比图
-# TODO
-# @app.route("/analyse/line/issue/reaction", methods=["GET"])
-# def draw_issue_pct_change_by_reaction():
-
-
-# 请求：http://127.0.0.1:5000/analyse/line/issue/reaction
-# issue的reaction情绪文本占比图
 @app.route("/analyse/line/issue/reaction", methods=["GET"])
 def draw_issue_pct_change_by_reaction():
     data = json.loads(request.data)
@@ -598,14 +608,24 @@ def draw_comment_pct_change_by_reaction():
 
 # 请求：http://127.0.0.1:5000/analyse/line/all/user
 # 用户issue+comment情绪文本占比波动图
-# TODO
-# @app.route("/analyse/line/all/user", methods=["GET"])
-# def draw_all_pct_change_by_user():
-#
+# user: 用户名
+@app.route("/analyse/line/all/user", methods=["GET"])
+def draw_all_pct_change_by_user():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    freq = data.get('freq', None)
+    periods = data.get('periods', 8)
+    user = str(data.get('user', ''))
+    weighting = data.get('weighting', 0.7)
+    intervals = get_plot_intervals(start_time, end_time, freq, periods)
+    return plot_user_all_pct_change(repo_name, user, intervals, weighting)
 
 
 # 请求：http://127.0.0.1:5000/analyse/line/issue/user
 # 用户issue情绪文本占比波动图
+# user: 用户名
 @app.route("/analyse/line/issue/user", methods=["GET"])
 def draw_issue_pct_change_by_user():
     data = json.loads(request.data)
@@ -621,6 +641,7 @@ def draw_issue_pct_change_by_user():
 
 # 请求：http://127.0.0.1:5000/analyse/line/comment/user
 # 用户comment情绪文本占比波动图
+# user: 用户名
 @app.route("/analyse/line/comment/user", methods=["GET"])
 def draw_comment_pct_change_by_user():
     data = json.loads(request.data)
