@@ -28,6 +28,9 @@ from service.scraper.GitHubScraper import GitHubScraper
 from service.scraper.Params import Params
 from utils.Email import send_crawling_completed
 
+# tmp
+from dao import IssueDao
+
 # 导入环境变量
 from utils.Env import DB_HOSTNAME, DB_DATABASE, DB_USERNAME, DB_PASSWORD, DB_PORT, ACCESS_TOKEN
 
@@ -340,6 +343,17 @@ def crawling_new():
     return "success"
 
 
+@app.route("/download", methods=["POST"])
+def download():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo', ''))
+    since = str(data.get('since', ''))
+    until = str(data.get('until', ''))
+    result = IssueDao.get_by_create_time_all(repo_name, since, until)
+    result_json = [issue.to_dict() for issue in result]
+    return jsonify(result_json)
+
+
 # 仅爬取issue
 @app.route("/crawling/issue", methods=["POST"])
 def crawling_issue():
@@ -480,6 +494,7 @@ def draw_comment_pct_change_by_reaction():
 @app.route("/analyse/pie/all", methods=["GET"])
 def draw_all_pct_change():
     # TODO
+    pass
 
 
 # 请求：http://127.0.0.1:5000/analyse/pie/issue
@@ -511,6 +526,7 @@ def draw_comment_pct_change():
 @app.route("/analyse/pie/all/user", methods=["GET"])
 def draw_all_pct_change_by_user():
     # TODO
+    pass
 
 
 # 请求：http://127.0.0.1:5000/analyse/pie/issue/user

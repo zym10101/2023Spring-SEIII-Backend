@@ -20,4 +20,16 @@ class Label(db.Model):
     color = db.Column(db.String(64), nullable=False)
     default = db.Column(db.Boolean, nullable=False)
     description = db.Column(db.Text, nullable=True)
+
     # category 新增一个属性。便于聚集各个子标签，初始化时不填，通过解析description得到
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'node_id': self.node_id,
+            'url': self.url,
+            'name': self.name,
+            'color': self.color,
+            'default': self.default,
+            'description': self.description
+        }

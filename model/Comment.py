@@ -89,3 +89,30 @@ class Comment(db.Model):
     def read_by_row(session):
         for comment in session.query(Comment):
             yield comment
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'url': self.url,
+            'html_url': self.html_url,
+            'issue_url': self.issue_url,
+            'node_id': self.node_id,
+            'user': self.user.to_dict(),
+            'created_at': self.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'updated_at': self.updated_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'author_association': self.author_association,
+            'body': self.body,
+            'pos_body': self.pos_body,
+            'neg_body': self.neg_body,
+            'reactions_url': self.reactions_url,
+            'reactions_total_count': self.reactions_total_count,
+            'reactions_plus_one': self.reactions_plus_one,
+            'reactions_minus_one': self.reactions_minus_one,
+            'reactions_laugh': self.reactions_laugh,
+            'reactions_hooray': self.reactions_hooray,
+            'reactions_confused': self.reactions_confused,
+            'reactions_heart': self.reactions_heart,
+            'reactions_rocket': self.reactions_rocket,
+            'reactions_eyes': self.reactions_eyes,
+            'performed_via_github_app': self.performed_via_github_app
+        }
