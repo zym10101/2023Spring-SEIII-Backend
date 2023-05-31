@@ -18,7 +18,8 @@ class Comment(db.Model):
         self.created_at = datetime.strptime(issue_dict['created_at'], '%Y-%m-%dT%H:%M:%SZ')
         self.updated_at = datetime.strptime(issue_dict['updated_at'], '%Y-%m-%dT%H:%M:%SZ')
         self.author_association = issue_dict['author_association']
-        self.body = issue_dict['body']
+        if issue_dict['body'] is not None:
+            self.body = issue_dict['body'].encode('utf-8')
         self.pos_body = None
         self.neg_body = None
         self.reactions_url = issue_dict['reactions']['url']

@@ -43,8 +43,8 @@ class Issue(db.Model):
             self.pull_request_patch_url = issue_dict['pull_request']['patch_url']
             self.pull_request_merged_at = issue_dict['pull_request']['merged_at']
 
-        if len(str(issue_dict['body'])) < 65536:
-            self.body = issue_dict['body']
+        if issue_dict['body'] is not None and len(str(issue_dict['body'])) < 65536:
+            self.body = issue_dict['body'].encode('utf-8')
         else:
             self.body = ""
 
