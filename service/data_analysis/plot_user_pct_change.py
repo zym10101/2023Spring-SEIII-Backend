@@ -23,7 +23,15 @@ def plot_user_issue_pct_change(repo_name, user, intervals):
         neg_list.append(neg)
         neu_list.append(neu)
 
-    return [index, pos_list, neu_list, neg_list, 'Date']
+    return {"title": "用户issue情绪文本占比波动图",
+            "data":{
+                "pos": pos_list,
+                "neg": neg_list,
+                "neu": neu_list,
+                "xAxis": index
+            }
+            }
+    # return [index, pos_list, neu_list, neg_list, 'Date']
     # return [index, pos_list, neu_list, neg_list, '用户issue情绪文本占比波动图', 'Date']
 
 
@@ -46,7 +54,15 @@ def plot_user_comment_pct_change(repo_name, user, intervals):
         neg_list.append(neg)
         neu_list.append(neu)
 
-    return [index, pos_list, neu_list, neg_list, 'Date']
+    return {"title": "用户comment情绪文本占比波动图",
+            "data": {
+                "pos": pos_list,
+                "neg": neg_list,
+                "neu": neu_list,
+                "xAxis": index
+            }
+            }
+    # return [index, pos_list, neu_list, neg_list, 'Date']
     # return [index, pos_list, neu_list, neg_list, '用户comment情绪文本占比波动图', 'Date']
 
 
@@ -69,4 +85,12 @@ def plot_user_all_pct_change(repo_name, user, intervals, weighting):
         neg_list.append(neg)
         neu_list.append(neu)
 
-    return [index, pos_list, neu_list, neg_list, 'Date']
+    return {"title": "用户issue+comment情绪文本占比波动图",
+            "data": {
+                "pos": pos_list,
+                "neg": neg_list,
+                "neu": neu_list,
+                "xAxis": index
+            }
+            }
+    # return [index, pos_list, neu_list, neg_list, 'Date']

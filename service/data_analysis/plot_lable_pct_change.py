@@ -21,7 +21,16 @@ def plot_issue_pct_change_by_label(repo, start_time, end_time, labels=None):
         neg_list.append(neg)
         neu_list.append(neu)
 
-    return [labels, pos_list, neu_list, neg_list, 'Labels']
+    return {"title": "issue的labels情绪文本占比图",
+            "data": {
+                "pos": pos_list,
+                "neg": neg_list,
+                "neu": neu_list,
+                "xAxis": labels
+            },
+
+            }
+    # return [labels, pos_list, neu_list, neg_list, 'Labels']
     # return [labels, pos_list, neu_list, neg_list, 'issue的labels情绪文本占比图', 'Labels']
 
 
@@ -41,7 +50,16 @@ def plot_comment_pct_change_by_label(repo, start_time, end_time, labels=None):
         neg_list.append(neg)
         neu_list.append(neu)
 
-    return [labels, pos_list, neu_list, neg_list, 'Labels']
+    return {"title": "comment的labels情绪文本占比图",
+            "data": {
+                "pos": pos_list,
+                "neg": neg_list,
+                "neu": neu_list,
+                "xAxis": labels
+            },
+
+            }
+    # return [labels, pos_list, neu_list, neg_list, 'Labels']
     # return [labels, pos_list, neu_list, neg_list, 'comment的labels情绪文本占比图', 'Labels']
 
 
@@ -61,4 +79,13 @@ def plot_all_pct_change_by_label(repo, start_time, end_time, weighting, labels=N
         neg_list.append(neg)
         neu_list.append(neu)
 
-    return [labels, pos_list, neu_list, neg_list, 'Labels']
+    return {"title": "issue+comment的labels情绪文本占比图",
+            "data": {
+                "pos": pos_list,
+                "neg": neg_list,
+                "neu": neu_list,
+                "xAxis": labels
+            },
+
+            }
+    # return [labels, pos_list, neu_list, neg_list, 'Labels']

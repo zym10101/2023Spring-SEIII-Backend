@@ -36,12 +36,12 @@ def plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals):
             neg_list.append(neg)
             neu_list.append(neu)
 
-        return {"title": "项目整体情绪分布图——issue",
+        return {"title": "项目issue",
                 "data":{
                     "pos": pos_list,
                     "neg": neg_list,
                     "neu": neu_list,
-                    "xAxis": intervals
+                    "xAxis": index
                 },
                 }
         # return [index, pos_list, neu_list, neg_list, '项目issue情绪文本占比波动图', 'Date']
@@ -67,13 +67,13 @@ def plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals):
             neg_list.append(neg)
             neu_list.append(neu)
 
-        return {"title": "项目整体情绪分布图——comment",
+        return {"title": "项目comment",
                 # "data": [pos_list, neu_list, neg_list],
                 "data":{
                     "pos": pos_list,
                     "neg": neg_list,
                     "neu": neu_list,
-                    "xAxis": intervals
+                    "xAxis": index
                 },
 
                 }
@@ -103,4 +103,14 @@ def plot_repo_all_pct_change(repo_name, start_time, end_time, intervals, weighti
             neg_list.append(neg)
             neu_list.append(neu)
 
-        return [index, pos_list, neu_list, neg_list, 'Date']
+        return {"title": "项目comment",
+                # "data": [pos_list, neu_list, neg_list],
+                "data": {
+                    "pos": pos_list,
+                    "neg": neg_list,
+                    "neu": neu_list,
+                    "xAxis": index
+                },
+
+                }
+        # return [index, pos_list, neu_list, neg_list, 'Date']
