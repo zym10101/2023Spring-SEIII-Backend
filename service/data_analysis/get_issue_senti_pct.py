@@ -1,6 +1,13 @@
 from dao.IssueDao import get_by_create_time_all
 
 
+def get_issue_pct_by_time(repo_name, start_time, end_time, polarity):
+    issues = get_by_create_time_all(repo_name, start_time, end_time)
+    if len(issues) == 0:
+        return f"该时间段内，{repo_name} issue为空！"
+    return get_issue_pct(issues, polarity)
+
+
 def get_issue_pct(issues, polarity):
     if len(issues) == 0:
         return -1
@@ -22,21 +29,3 @@ def get_issue_pct(issues, polarity):
         return pos_count / len(issues)
     else:
         return neg_count / len(issues)
-
-
-def get_issue_pos_pct(repo_name, start_time, end_time):
-    issues = get_by_create_time_all(repo_name, start_time, end_time)
-    pct = get_issue_pct(issues, "pos")
-    if pct == -1:
-        return f"该时间段内，{repo_name} issue为空！"
-    else:
-        return pct
-
-
-def get_issue_neg_pct(repo_name, start_time, end_time):
-    issues = get_by_create_time_all(repo_name, start_time, end_time)
-    pct = get_issue_pct(issues, "neg")
-    if pct == -1:
-        return f"该时间段内，{repo_name} issue为空！"
-    else:
-        return pct

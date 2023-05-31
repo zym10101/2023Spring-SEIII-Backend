@@ -13,7 +13,7 @@ class Params:
     def __init__(self):
         self.params = {
             'state': 'all',
-            'per_page': 10
+            'per_page': 100
         }
 
     def add_param(self, key, value):

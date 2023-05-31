@@ -1,7 +1,5 @@
-from collections import defaultdict
-
-from sqlalchemy import distinct, or_
-
+from sqlalchemy import *
+import re
 from dao.Database import db
 from model.User import User
 from model.Issue import Issue
@@ -16,9 +14,10 @@ def save_single(json):
     for label_ in json['labels']:
         labels_.append(Label(label_))
     issue_comments_ = []
-    for comment_ in json['comments_json']:
-        issue_comments_.append(Comment(comment_))
-        users_.append(User(comment_['user']))
+    if 'comments_json' in json.keys():
+        for comment_ in json['comments_json']:
+            issue_comments_.append(Comment(comment_))
+            users_.append(User(comment_['user']))
 
     # 2.创建 issue ORM对象
     issue_ = Issue(json)
@@ -31,6 +30,24 @@ def save_single(json):
     db.session.merge(issue_)
 
     # 4.确认提交
+    db.session.commit()
+
+
+def save_list(json_list):
+    for json in json_list:
+        save_single(json)
+
+
+def create_association(repo_name):
+    # 根据 repo_name 查询 Issue 表
+    issues = Issue.query.filter(Issue.repository_url.endswith(repo_name)).all()
+
+    for issue in issues:
+        comments_url = issue.comments_url
+        issue_number = re.search(r'/(\d+)/comments', comments_url).group(1)
+        issue.issue_comments = Comment.query.filter(Comment.issue_url.endswith(issue_number)).all()
+
+    # 保存修改到数据库
     db.session.commit()
 
 
@@ -58,58 +75,27 @@ def get_by_row(repo_name):
         yield issue
 
 
-def get_labels(repo_name, begin_time, end_time):
-    labels_list = [issue.labels for issue in Issue.query \
-        .filter(Issue.repository_url.endswith(repo_name)) \
-        .filter(Issue.created_at.between(begin_time, end_time)) \
-        .all()]
-    labels = list(set(element for sublist in labels_list for element in sublist))
-    label_id = [label.id for label in labels]
-    labels = Label.query.filter(or_(*[Label.id == id for id in label_id])).with_entities(Label.name).all()
-    label_names = list(set([label.name for label in labels]))
-    return label_names
-
-
-def get_labels_8(repo_name, begin_time, end_time):
-    issues = get_by_create_time_all(repo_name, begin_time, end_time)
-    label_count = {}
-    for issue in issues:
-        for label in issue.labels:
-            if label.id in label_count:
-                label_count[label.id] += 1
-            else:
-                label_count[label.id] = 1
-
-    if(len(label_count) > 8):
-        sorted_labels = sorted(label_count.items(), key=lambda x: x[1], reverse=True)[:8]
-    else:
-        sorted_labels = sorted(label_count.items(), key=lambda x: x[1], reverse=True)
-    top_labels = [Label.query.get(label_id) for label_id, count in sorted_labels]
-    return list(set([label.name for label in top_labels]))
-
-
 def get_issues_by_label_name(repo_name, label_name, begin_time, end_time):
     labels = Label.query.filter(Label.name == label_name).all()
     label_id = [label.id for label in labels]
-    issues = list(set(Issue.query.filter(Issue.labels.any(or_(*[Label.id == id for id in label_id])))\
+
+    # issues = Issue.query.all()
+    # for id in label_id:
+    #     for issue in issues:
+    #         issue_labels = issue.labels
+    #         for issue_label in issue_labels:
+    #             if issue_label.id == id:
+    #                 print(issue)
+
+
+    issues = list(set(Issue.query.filter(Issue.labels.any(or_(*[Label.id == id for id in label_id]))) \
                       .filter(Issue.repository_url.endswith(repo_name)) \
                       .filter(Issue.created_at.between(begin_time, end_time)) \
                       .all()))
     return issues
 
 
-# 根据label_name获取对应的issue的comments
-def get_comments_by_label_name(repo_name, label_name, begin_time, end_time):
-    issues = get_issues_by_label_name(repo_name,label_name,begin_time,end_time)
-    comments = []
-    for issue in issues:
-        # print(issue.comments)
-        comments.extend(issue.comments)
-    return comments
-
-
-
-def get_by_reactions(repo_name, begin_time, end_time, reaction, nums=1):
+def get_issues_by_reactions(repo_name, begin_time, end_time, reaction, nums=1):
     query = Issue.query \
         .filter(Issue.repository_url.endswith(repo_name)) \
         .filter(Issue.created_at.between(begin_time, end_time))
@@ -118,18 +104,6 @@ def get_by_reactions(repo_name, begin_time, end_time, reaction, nums=1):
     results = query.all()
     return results
 
-
-def get_comments_by_reactions(repo_name, begin_time, end_time, reaction, nums=1):
-    issues = Issue.query \
-        .filter(Issue.repository_url.endswith(repo_name)) \
-        .filter(Issue.created_at.between(begin_time, end_time)) \
-        .all()
-    comments = []
-    for issue in issues:
-        # print(issue.comments)
-        comments.extend(issue.comments)
-    results = [comment for comment in comments if getattr(comment, "reactions_" + reaction) >= nums]
-    return results
 
 def template():
     # 1.条件查询
@@ -159,9 +133,10 @@ if __name__ == '__main__':
     from datetime import datetime
 
     with app.app_context():
-        begin = datetime(2023, 3, 15)
-        end = datetime(2023, 3, 17)
-        result = get_by_create_time_page('flink', begin, end, 2, 5)
-        for each in result:
-            print(each.id)
-        print('查询到{}条'.format(len(result)))
+        create_association('apache/tomcat')
+        # begin = datetime(2023, 3, 15)
+        # end = datetime(2023, 3, 17)
+        # result = get_by_create_time_page('flink', begin, end, 2, 5)
+        # for each in result:
+        #     print(each.id)
+        # print('查询到{}条'.format(len(result)))
