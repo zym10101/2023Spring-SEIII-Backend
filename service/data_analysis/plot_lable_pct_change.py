@@ -15,7 +15,7 @@ def plot_issue_pct_change_by_label(repo, start_time, end_time, labels=None):
         neg_list.append(get_issue_senti_pct_by_label(
             repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg'))
 
-    return labels, pos_list, neg_list, 'issue的labels情绪文本占比图', 'Labels'
+    return [labels, pos_list, neg_list, 'issue的labels情绪文本占比图', 'Labels']
 
 
 def plot_comment_pct_change_by_label(repo, start_time, end_time, labels=None):
@@ -29,4 +29,4 @@ def plot_comment_pct_change_by_label(repo, start_time, end_time, labels=None):
         neg_list.append(get_comment_senti_pct_by_label(
             repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg'))
 
-    return labels, pos_list, neg_list, 'comment的labels情绪文本占比图', 'Labels'
+    return [labels, pos_list, neg_list, 'comment的labels情绪文本占比图', 'Labels']

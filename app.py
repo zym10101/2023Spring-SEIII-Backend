@@ -36,6 +36,7 @@ from utils.Env import DB_HOSTNAME, DB_DATABASE, DB_USERNAME, DB_PASSWORD, DB_POR
 
 # 导入所需工具类
 from utils import DateUtil
+from utils.get_plot_intervals import get_plot_intervals
 
 # 使用Flask类创建一个app对象
 # __name__：代表当前app.py这个模块
@@ -432,6 +433,72 @@ def issue_cal_senti():
 jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
 
 
+# 请求：http://127.0.0.1:5000/analyse/pie/all
+# 项目issue+comment情绪文本占比饼图
+# TODO
+# @app.route("/analyse/pie/all", methods=["GET"])
+# def draw_all_pct():
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/issue
+# 项目issue情绪文本占比饼图
+@app.route("/analyse/pie/issue", methods=["GET"])
+def draw_issue_pct():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    intervals = [start_time, end_time]
+    return plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals)
+
+
+# 请求：http://127.0.0.1:5000/analyse/pie/comment
+# 项目comment情绪文本占比饼图
+@app.route("/analyse/pie/comment", methods=["GET"])
+def draw_comment_pct():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    intervals = [start_time, end_time]
+    return plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals)
+
+
+# 请求：http://127.0.0.1:5000/analyse/line/all
+# 项目issue+comment情绪文本占比波动图
+# TODO
+# @app.route("/analyse/line/all", methods=["GET"])
+# def draw_all_pct_change():
+
+
+# 请求：http://127.0.0.1:5000/analyse/line/issue
+# 项目issue情绪文本占比波动图
+@app.route("/analyse/line/issue", methods=["GET"])
+def draw_issue_pct_change():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    freq = data.get('freq', None)
+    periods = data.get('periods', 8)
+    intervals = get_plot_intervals(start_time, end_time, freq, periods)
+    return plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals)
+
+
+# 请求：http://127.0.0.1:5000/analyse/line/comment
+# 项目comment情绪文本占比波动图
+@app.route("/analyse/line/comment", methods=["GET"])
+def draw_comment_pct_change():
+    data = json.loads(request.data)
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    freq = data.get('freq', None)
+    periods = data.get('periods', 8)
+    intervals = get_plot_intervals(start_time, end_time, freq, periods)
+    return plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals)
+
+
 # 请求：http://127.0.0.1:5000/get-issue-labels
 # 获取某一项目的某一时间段内issue所有的label的name列表
 @app.route("/get-issue-labels", methods=["GET"])
@@ -443,9 +510,16 @@ def get_issue_labels():
     return get_labels(repo_name, start_time, end_time)
 
 
-# 请求：http://127.0.0.1:5000/analyse/pie/issue/label
-# 根据label，获取拥有该label的issue的情绪值占比
-@app.route("/analyse/pie/issue/label", methods=["GET"])
+# 请求：http://127.0.0.1:5000/analyse/line/all/label
+# issue+comment的labels情绪文本占比图
+# TODO
+# @app.route("/analyse/line/all/label", methods=["GET"])
+# def draw_all_pct_change_by_label():
+
+
+# 请求：http://127.0.0.1:5000/analyse/line/issue/label
+# issue的labels情绪文本占比图
+@app.route("/analyse/line/issue/label", methods=["GET"])
 def draw_issue_pct_change_by_label():
     data = json.loads(request.data)
     repo_name = str(data.get('repo_name', ''))
@@ -455,9 +529,9 @@ def draw_issue_pct_change_by_label():
     return plot_issue_pct_change_by_label(repo_name, start_time, end_time, labels)
 
 
-# 请求：http://127.0.0.1:5000/analyse/pie/comment/label
-# 根据label，获取拥有该label的issue的comment的情绪值占比
-@app.route("/analyse/pie/comment/label", methods=["GET"])
+# 请求：http://127.0.0.1:5000/analyse/line/comment/label
+# comment的labels情绪文本占比图
+@app.route("/analyse/line/comment/label", methods=["GET"])
 def draw_comment_pct_change_by_label():
     data = json.loads(request.data)
     repo_name = str(data.get('repo_name', ''))
@@ -467,9 +541,16 @@ def draw_comment_pct_change_by_label():
     return plot_issue_pct_change_by_label(repo_name, start_time, end_time, labels)
 
 
-# 请求：http://127.0.0.1:5000/analyse/pie/issue/reaction
-# 根据每种reaction，计算拥有这种reaction的issue的情绪值占比
-@app.route("/analyse/pie/issue/reaction", methods=["GET"])
+# 请求：http://127.0.0.1:5000/analyse/line/issue/reaction
+# issue的reaction情绪文本占比图
+# TODO
+# @app.route("/analyse/line/issue/reaction", methods=["GET"])
+# def draw_issue_pct_change_by_reaction():
+
+
+# 请求：http://127.0.0.1:5000/analyse/line/issue/reaction
+# issue的reaction情绪文本占比图
+@app.route("/analyse/line/issue/reaction", methods=["GET"])
 def draw_issue_pct_change_by_reaction():
     data = json.loads(request.data)
     repo_name = str(data.get('repo_name', ''))
@@ -478,9 +559,9 @@ def draw_issue_pct_change_by_reaction():
     return plot_issue_reaction_pct(repo_name, start_time, end_time)
 
 
-# 请求：http://127.0.0.1:5000/analyse/pie/comment/reaction
-# 根据每种reaction，计算拥有这种reaction的issue的comment的情绪值占比
-@app.route("/analyse/pie/comment/reaction", methods=["GET"])
+# 请求：http://127.0.0.1:5000/analyse/line/comment/reaction
+# comment的reaction情绪文本占比图
+@app.route("/analyse/line/comment/reaction", methods=["GET"])
 def draw_comment_pct_change_by_reaction():
     data = json.loads(request.data)
     repo_name = str(data.get('repo_name', ''))
@@ -489,65 +570,39 @@ def draw_comment_pct_change_by_reaction():
     return plot_comment_reaction_pct(repo_name, start_time, end_time)
 
 
-# 请求：http://127.0.0.1:5000/analyse/pie/all
-# 获取某一项目的某一时间段内整体情绪分布
-@app.route("/analyse/pie/all", methods=["GET"])
-def draw_all_pct_change():
-    # TODO
-    pass
+# 请求：http://127.0.0.1:5000/analyse/line/all/user
+# 用户issue+comment情绪文本占比波动图
+# TODO
+# @app.route("/analyse/line/all/user", methods=["GET"])
+# def draw_all_pct_change_by_user():
+#
 
 
-# 请求：http://127.0.0.1:5000/analyse/pie/issue
-# 获取某一项目的某一时间段内issue情绪分布
-@app.route("/analyse/pie/issue", methods=["GET"])
-def draw_issue_pct_change():
-    data = json.loads(request.data)
-    repo_name = str(data.get('repo_name', ''))
-    start_time = str(data.get('start_time', ''))
-    end_time = str(data.get('end_time', ''))
-    intervals = data.get('intervals', '')
-    return plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals)
-
-
-# 请求：http://127.0.0.1:5000/analyse/pie/comment
-# 获取某一项目的某一时间段内issue的comment的情绪分布
-@app.route("/analyse/pie/comment", methods=["GET"])
-def draw_comment_pct_change():
-    data = json.loads(request.data)
-    repo_name = str(data.get('repo_name', ''))
-    start_time = str(data.get('start_time', ''))
-    end_time = str(data.get('end_time', ''))
-    intervals = data.get('intervals', '')
-    return plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals)
-
-
-# 请求：http://127.0.0.1:5000/analyse/pie/all/user
-# 获取某用户某一时间段内发布的issue和comment整体情绪分布
-@app.route("/analyse/pie/all/user", methods=["GET"])
-def draw_all_pct_change_by_user():
-    # TODO
-    pass
-
-
-# 请求：http://127.0.0.1:5000/analyse/pie/issue/user
-# 获取某一项目时间段内某个user发布的issue情绪分布
-@app.route("/analyse/pie/issue/user", methods=["GET"])
+# 请求：http://127.0.0.1:5000/analyse/line/issue/user
+# 用户issue情绪文本占比波动图
+@app.route("/analyse/line/issue/user", methods=["GET"])
 def draw_issue_pct_change_by_user():
     data = json.loads(request.data)
     repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    freq = data.get('freq', None)
+    periods = data.get('periods', 8)
     user = str(data.get('user', ''))
-    intervals = data.get('intervals', '')
+    intervals = get_plot_intervals(start_time, end_time, freq, periods)
     return plot_user_issue_pct_change(repo_name, user, intervals)
 
 
-# 请求：http://127.0.0.1:5000/analyse/pie/comment/user
-# 获取某一项目时间段内某个user发布的comment的情绪分布
-@app.route("/analyse/pie/comment/user", methods=["GET"])
+# 请求：http://127.0.0.1:5000/analyse/line/comment/user
+# 用户comment情绪文本占比波动图
+@app.route("/analyse/line/comment/user", methods=["GET"])
 def draw_comment_pct_change_by_user():
     data = json.loads(request.data)
     repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
     user = str(data.get('user', ''))
-    intervals = data.get('intervals', '')
+    intervals = [start_time, end_time]
     return plot_user_comment_pct_change(repo_name, user, intervals)
 
 

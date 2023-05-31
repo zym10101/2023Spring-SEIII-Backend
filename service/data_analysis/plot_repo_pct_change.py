@@ -24,22 +24,22 @@ def plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals):
             pos_list.append(get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos'))
             neg_list.append(get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg'))
 
-        return index, pos_list, neg_list, '项目issue情绪文本占比波动图', 'Date'
+        return [index, pos_list, neg_list, '项目issue情绪文本占比波动图', 'Date']
 
 
 def plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals):
     if get_comment_pct_by_time(repo_name, start_time, end_time, 'pos') != f"该时间段内，{repo_name} issue为空！":
         index = []
-        for i in range(len(intervals)):
+        for i in range(len(intervals) - 1):
             index.append(str(intervals[i]) + '~' + str(intervals[i + 1]))
         # 定义空数组用于保存结果
         pos_list = []
         neg_list = []
         # 循环遍历这些时间点
-        for i in range(len(intervals)):
+        for i in range(len(intervals) - 1):
             start_t = intervals[i]
             end_t = intervals[i + 1]
             pos_list.append(get_comment_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos'))
             neg_list.append(get_comment_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg'))
 
-        return index, pos_list, neg_list, '项目issue情绪文本占比波动图', 'Date'
+        return [index, pos_list, neg_list, '项目issue comment情绪文本占比波动图', 'Date']
