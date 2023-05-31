@@ -13,16 +13,16 @@ def get_issue_users(repo_name, begin_time, end_time):
         .filter(Issue.repository_url.endswith(repo_name)) \
         .filter(Issue.created_at.between(begin_time, end_time)) \
         .all()]
-    users = list(set(element for sublist in users_list for element in sublist))
-    user_names = [user.login for user in users]
+    users_list = list(set(filter(lambda x: x is not None, users_list)))
+    user_names = [user.login for user in users_list]
     return user_names
 
 
 def get_comment_users(repo_name, begin_time, end_time):
-    users_list = [comment.user for comment in Comment.query.filter(Issue.repository_url.endswith(repo_name)) \
-        .filter(Issue.created_at.between(begin_time, end_time)).all()]
-    users = list(set(element for sublist in users_list for element in sublist))
-    user_names = [user.login for user in users]
+    users_list = [comment.user for comment in Comment.query.filter(Comment.url.contains(repo_name)) \
+        .filter(Comment.created_at.between(begin_time, end_time)).all()]
+    users_list = list(set(filter(lambda x: x is not None, users_list)))
+    user_names = [user.login for user in users_list]
     return user_names
 
 

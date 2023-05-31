@@ -27,7 +27,7 @@ def get_labels_8(repo_name, begin_time, end_time):
             else:
                 label_count[label.id] = 1
 
-    if (len(label_count) > 8):
+    if len(label_count) > 8:
         sorted_labels = sorted(label_count.items(), key=lambda x: x[1], reverse=True)[:8]
     else:
         sorted_labels = sorted(label_count.items(), key=lambda x: x[1], reverse=True)

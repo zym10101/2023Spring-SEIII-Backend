@@ -10,6 +10,7 @@ import threading
 # 导入dao层相关内容
 from dao.Database import db
 from dao.LabelDao import get_labels_8, get_labels
+from dao.UserDao import get_issue_users, get_comment_users
 
 # 导入所需model
 from model.User import User
@@ -451,7 +452,7 @@ jpype.startJVM(classpath="./sentistrength/SentiStrength-1.0-SNAPSHOT.jar")
 # weighting: issue情绪值权重，默认为0.7
 @app.route("/analyse/pie/all", methods=["GET"])
 def draw_all_pct():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -466,11 +467,11 @@ def draw_all_pct():
 def draw_issue_pct():
     # print(request.data)
     # data = json.loads(request.data)
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
-    print(repo_name,start_time,end_time)
+    print(repo_name, start_time, end_time)
     intervals = [start_time, end_time]
 
     return jsonify(plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals))
@@ -494,7 +495,7 @@ def draw_comment_pct():
 # weighting: issue情绪值权重，默认为0.7
 @app.route("/analyse/line/all", methods=["GET"])
 def draw_all_pct_change():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -541,7 +542,7 @@ def draw_comment_pct_change():
 # 获取某一项目的某一时间段内issue所有的label的name列表
 @app.route("/get-issue-labels", methods=["GET"])
 def get_issue_labels():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -551,8 +552,8 @@ def get_issue_labels():
 # 请求：http://127.0.0.1:5000/get-most-used-labels
 # 获取某一项目的某一时间段内对应issue最多的8个label的name列表
 @app.route("/get-most-used-labels", methods=["GET"])
-def get_issue_labels():
-    data=request.args
+def get_most_issue_labels():
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -563,7 +564,7 @@ def get_issue_labels():
 # issue+comment的labels情绪文本占比图
 @app.route("/analyse/line/all/label", methods=["GET"])
 def draw_all_pct_change_by_label():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -576,7 +577,7 @@ def draw_all_pct_change_by_label():
 # issue的labels情绪文本占比图
 @app.route("/analyse/line/issue/label", methods=["GET"])
 def draw_issue_pct_change_by_label():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -588,7 +589,7 @@ def draw_issue_pct_change_by_label():
 # comment的labels情绪文本占比图
 @app.route("/analyse/line/comment/label", methods=["GET"])
 def draw_comment_pct_change_by_label():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -612,7 +613,7 @@ def draw_all_pct_change_by_reaction():
 # issue的reaction情绪文本占比图
 @app.route("/analyse/line/issue/reaction", methods=["GET"])
 def draw_issue_pct_change_by_reaction():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -623,11 +624,46 @@ def draw_issue_pct_change_by_reaction():
 # comment的reaction情绪文本占比图
 @app.route("/analyse/line/comment/reaction", methods=["GET"])
 def draw_comment_pct_change_by_reaction():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
     return jsonify(plot_comment_reaction_pct(repo_name, start_time, end_time))
+
+
+# 请求：http://127.0.0.1:5000/get-issue-users
+# 获取issue的所有user
+@app.route("/get-issue-users", methods=["GET"])
+def get_users_issue():
+    data = request.args
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    return get_issue_users(repo_name, start_time, end_time)
+
+
+# 请求：http://127.0.0.1:5000/get-comment-users
+# 获取comment的所有user
+@app.route("/get-comment-users", methods=["GET"])
+def get_users_comment():
+    data = request.args
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    return get_comment_users(repo_name, start_time, end_time)
+
+
+# 请求：http://127.0.0.1:5000/get-all-users
+# 获取issue+comment的所有user
+@app.route("/get-all-users", methods=["GET"])
+def get_users_all():
+    data = request.args
+    repo_name = str(data.get('repo_name', ''))
+    start_time = str(data.get('start_time', ''))
+    end_time = str(data.get('end_time', ''))
+    user_list = get_issue_users(repo_name, start_time, end_time)
+    user_list.extend(get_comment_users(repo_name, start_time, end_time))
+    return list(set(user_list))
 
 
 # 请求：http://127.0.0.1:5000/analyse/line/all/user
@@ -635,7 +671,7 @@ def draw_comment_pct_change_by_reaction():
 # user: 用户名
 @app.route("/analyse/line/all/user", methods=["GET"])
 def draw_all_pct_change_by_user():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -652,7 +688,7 @@ def draw_all_pct_change_by_user():
 # user: 用户名
 @app.route("/analyse/line/issue/user", methods=["GET"])
 def draw_issue_pct_change_by_user():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -668,7 +704,7 @@ def draw_issue_pct_change_by_user():
 # user: 用户名
 @app.route("/analyse/line/comment/user", methods=["GET"])
 def draw_comment_pct_change_by_user():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
