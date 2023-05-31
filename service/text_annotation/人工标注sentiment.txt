@@ -38,7 +38,7 @@
 0	Team encountering {Error}connecting} to 【Superset site】 via VPN
 0	（Updating）【superset frontend】 on production
 0	{Cannot import} 【dashboard zip file】 from the same version superset 
-0	【Bar Chart】 and 【area chart】 {not handling}【epoch_ms dates】 {properly}
+0	【Bar Chart】{not handling}【epoch_ms dates】 {properly}
 0	【Superset】 {Fails to Start} 【in Docker】 with Missing /app/docker/docker-bootstrap.sh Error
 0	Creating 【Time-series Line Chart 】with high cardinality always {times out}
 -2	【Manual update】 {failure} from 《2.0.1 to 2.1.0》
@@ -46,7 +46,7 @@
 0	【Language Selection】 {doesn't always switch} language
 0	【Datatype】 {not correctly exported} to xlsx - with patch suggestion
 0	docker-compose up and {can't open} the 【UI】
-0	Sort by is {not working} for 【Pivot Table】 and 【Pivot Table V2 chart】
+0	Sort by is {not working} for 【Pivot Table
 0	{Edit} native 【filter】 make {crash}
 0	{Incorrect UserDefinedType} for columns when using 【Apache Drill】 on parquet files
 0	{Unable to add} 【Bulk users】 using a dict
