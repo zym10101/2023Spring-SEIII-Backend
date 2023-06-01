@@ -5,6 +5,7 @@ import jpype
 from dotenv import load_dotenv
 import concurrent.futures
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import threading
 
 # 导入dao层相关内容
@@ -50,6 +51,7 @@ from utils.get_plot_intervals import get_plot_intervals
 # 1. 以后出现bug可以帮助快速定位
 # 2. 对于寻找模板文件有一个相对路径
 app = Flask(__name__)
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] \
     = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOSTNAME}:{DB_PORT}/{DB_DATABASE}?charset=utf8mb4"
 
@@ -503,7 +505,7 @@ def draw_all_pct_change():
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
     freq = data.get('freq', None)
-    periods = data.get('periods', 8)
+    periods = int(data.get('periods', 8))
     weighting = data.get('weighting', 0.7)
     intervals = get_plot_intervals(start_time, end_time, freq, periods)
     weighting = float(weighting)
@@ -521,7 +523,7 @@ def draw_issue_pct_change():
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
     freq = data.get('freq', None)
-    periods = data.get('periods', 8)
+    periods = int(data.get('periods', 8))
     intervals = get_plot_intervals(start_time, end_time, freq, periods)
     return jsonify(plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals))
 
@@ -537,7 +539,7 @@ def draw_comment_pct_change():
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
     freq = data.get('freq', None)
-    periods = data.get('periods', 8)
+    periods = int(data.get('periods', 8))
     intervals = get_plot_intervals(start_time, end_time, freq, periods)
     return jsonify(plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals))
 
@@ -682,7 +684,7 @@ def draw_all_pct_change_by_user():
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
     freq = data.get('freq', None)
-    periods = data.get('periods', 8)
+    periods = int(data.get('periods', 8))
     user = str(data.get('user', ''))
     weighting = data.get('weighting', 0.7)
     intervals = get_plot_intervals(start_time, end_time, freq, int(periods))
@@ -700,7 +702,7 @@ def draw_issue_pct_change_by_user():
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
     freq = data.get('freq', None)
-    periods = data.get('periods', 8)
+    periods = int(data.get('periods', 8))
     user = str(data.get('user', ''))
     intervals = get_plot_intervals(start_time, end_time, freq, int(periods))
     return jsonify(plot_user_issue_pct_change(repo_name, user, intervals))
