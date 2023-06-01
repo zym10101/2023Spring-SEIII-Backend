@@ -2,6 +2,7 @@ from dao.LabelDao import get_labels_8
 from service.data_analysis.get_senti_pct_by_label import get_issue_senti_pct_by_label, get_comment_senti_pct_by_label, \
     get_all_senti_pct_by_label
 from utils.DateUtil import convert_to_iso8601
+from service.data_analysis.sort_util import sort_data
 
 
 # labels为label name列表，默认为选定范围内全部，也可以用户指定
@@ -21,15 +22,15 @@ def plot_issue_pct_change_by_label(repo, start_time, end_time, labels=None):
         neg_list.append(neg)
         neu_list.append(neu)
 
-    return {"title": "issue的labels情绪文本占比图",
-            "data": {
-                "pos": pos_list,
-                "neg": neg_list,
-                "neu": neu_list,
-                "xAxis": labels
-            },
-
-            }
+    return sort_data({
+        "title": "issue的labels情绪文本占比图",
+        "data": {
+            "pos": pos_list,
+            "neg": neg_list,
+            "neu": neu_list,
+            "xAxis": labels
+        }
+    })
     # return [labels, pos_list, neu_list, neg_list, 'Labels']
     # return [labels, pos_list, neu_list, neg_list, 'issue的labels情绪文本占比图', 'Labels']
 
@@ -50,15 +51,15 @@ def plot_comment_pct_change_by_label(repo, start_time, end_time, labels=None):
         neg_list.append(neg)
         neu_list.append(neu)
 
-    return {"title": "comment的labels情绪文本占比图",
-            "data": {
-                "pos": pos_list,
-                "neg": neg_list,
-                "neu": neu_list,
-                "xAxis": labels
-            },
-
-            }
+    return sort_data({
+        "title": "comment的labels情绪文本占比图",
+        "data": {
+            "pos": pos_list,
+            "neg": neg_list,
+            "neu": neu_list,
+            "xAxis": labels
+        }
+    })
     # return [labels, pos_list, neu_list, neg_list, 'Labels']
     # return [labels, pos_list, neu_list, neg_list, 'comment的labels情绪文本占比图', 'Labels']
 
@@ -79,13 +80,13 @@ def plot_all_pct_change_by_label(repo, start_time, end_time, weighting, labels=N
         neg_list.append(neg)
         neu_list.append(neu)
 
-    return {"title": "issue+comment的labels情绪文本占比图",
-            "data": {
-                "pos": pos_list,
-                "neg": neg_list,
-                "neu": neu_list,
-                "xAxis": labels
-            },
-
-            }
+    return sort_data({
+        "title": "issue+comment的labels情绪文本占比图",
+        "data": {
+            "pos": pos_list,
+            "neg": neg_list,
+            "neu": neu_list,
+            "xAxis": labels
+        },
+    })
     # return [labels, pos_list, neu_list, neg_list, 'Labels']

@@ -22,7 +22,8 @@ from model.Account import Account
 # 导入service层相关内容
 from service.data_analysis.body_washer_and_cal import body_washer_and_cal
 from service.data_analysis.get_senti_pct_by_label import get_all_senti_pct_by_label
-from service.data_analysis.plot_lable_pct_change import plot_issue_pct_change_by_label, plot_all_pct_change_by_label
+from service.data_analysis.plot_lable_pct_change import plot_issue_pct_change_by_label, plot_all_pct_change_by_label, \
+    plot_comment_pct_change_by_label
 from service.data_analysis.plot_reaction_pct import plot_issue_reaction_pct, plot_comment_reaction_pct, \
     plot_all_reaction_pct
 from service.data_analysis.plot_repo_pct_change import plot_repo_issue_pct_change, plot_repo_comment_pct_change, \
@@ -554,7 +555,7 @@ def get_issue_labels():
 # 获取某一项目的某一时间段内对应issue最多的8个label的name列表
 @app.route("/get-most-used-labels", methods=["GET"])
 def get_most_used_labels():
-    data=request.args
+    data = request.args
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -595,7 +596,7 @@ def draw_comment_pct_change_by_label():
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
     labels = data.get('labels', None)
-    return jsonify(plot_issue_pct_change_by_label(repo_name, start_time, end_time, labels))
+    return jsonify(plot_comment_pct_change_by_label(repo_name, start_time, end_time, labels))
 
 
 # 请求：http://127.0.0.1:5000/analyse/line/all/reaction
