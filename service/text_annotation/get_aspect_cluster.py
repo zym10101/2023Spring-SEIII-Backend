@@ -142,11 +142,13 @@ def getAspectCluster():
             for index in linNo_array:
                 senti_score += int(sentiment[index - 1])
             context = aspect_table[key]
-            lineNo_sentiment[key] = {'lineNo': linNo_array, 'NumOfSentence': len(linNo_array), 'sentiment': round(senti_score / len(linNo_array), 1),
+            # 'NumOfSentence': len(linNo_array), 'sentiment': round(senti_score / len(linNo_array), 1)
+            lineNo_sentiment[key] = {'value': [len(linNo_array), round(senti_score / len(linNo_array), 1)],
                                      'context': context}
         json_objs = []
         for key in lineNo_sentiment:
-            json_obj = {key: lineNo_sentiment[key]}
+            json_obj = {"name": key,
+                        "data": lineNo_sentiment[key]}
             # 添加到JSON对象列表中
             json_objs.append(json_obj)
 
@@ -161,10 +163,11 @@ def getAspectCluster():
         # print()
         # for key, value in lineNo_sentiment.items():
         #     print(key, ':', value)
-        # 返回值格式：aspect名：{这个aspect包含的句子的序号，该aspect内句子平均情绪值，具体文本}
-        # page : {'lineNo': [1, 73, 96], 'sentiment': -14, 'context': [
-        # '【Chart】{cannot display} result with over【long integer】 but can display forecast value\n', '【Bar chart】{
-        # horizontal orientation out of X axis}\n', 'Dependent filter 【selects first value】{independently of the filter
-        # it depends on}, if it is set to "Select first filter value as default"\n']}
+        # 返回值格式：{ name: "aspect1",
+        #   data: {
+        #       value:[长度，情绪值],
+        #       context:["..","..."]
+        #   }
+        # }
 
         return json_objs
