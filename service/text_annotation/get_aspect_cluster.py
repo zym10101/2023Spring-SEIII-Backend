@@ -136,6 +136,7 @@ def getAspectCluster():
                     aspect_table_lineNo['date'].append(index)
                     aspect_table['date'].append(text[index - 1])
         lineNo_sentiment = {}
+        json_objs = []
         senti_score = 0
         for key in aspect_table_lineNo:
             linNo_array = aspect_table_lineNo.get(key)
@@ -143,14 +144,18 @@ def getAspectCluster():
                 senti_score += int(sentiment[index - 1])
             context = aspect_table[key]
             # 'NumOfSentence': len(linNo_array), 'sentiment': round(senti_score / len(linNo_array), 1)
-            lineNo_sentiment[key] = {'value': [len(linNo_array), round(senti_score / len(linNo_array), 1)],
-                                     'context': context}
-        json_objs = []
-        for key in lineNo_sentiment:
+            # lineNo_sentiment[key] = {'value': [len(linNo_array), round(senti_score / len(linNo_array), 1)],
+            #                          'context': context}
             json_obj = {"name": key,
-                        "data": lineNo_sentiment[key]}
-            # 添加到JSON对象列表中
+                        "value": [len(linNo_array), round(senti_score / len(linNo_array), 1)],
+                        "context": context
+            }
             json_objs.append(json_obj)
+        # json_objs = []
+        # for key in lineNo_sentiment:
+        #     json_obj = {"name": key}
+        #     # 添加到JSON对象列表中
+        #     json_objs.append(json_obj)
 
         json_str = json.dumps(json_objs)
         print(json_str)
@@ -164,10 +169,8 @@ def getAspectCluster():
         # for key, value in lineNo_sentiment.items():
         #     print(key, ':', value)
         # 返回值格式：{ name: "aspect1",
-        #   data: {
-        #       value:[长度，情绪值],
-        #       context:["..","..."]
-        #   }
-        # }
+        #           value:[长度，情绪值],
+        #           context:["..","..."]
+        #           }
 
         return json_objs
