@@ -1,19 +1,12 @@
 stages:
-  - build
-  - test
   - deploy
-
-build:
-  stage: build
-  script:
-    - echo "Building the project"
-
-test:
-  stage: test
-  script:
-    - echo "Running tests"
 
 deploy:
   stage: deploy
+  before_script:
+    - apk add --no-cache sshpass
+    - apk add --no-cache openssh-client
   script:
-    - echo "Deploying the project"
+    - sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $CUSTOM_USERNAME@$CUSTOM_IP "mkdir -p /export/deploy"
+    - sshpass -p "$PASSWORD" scp -r ./ $CUSTOM_USERNAME@$CUSTOM_IP:/export/deploy
+    - sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $CUSTOM_USERNAME@$CUSTOM_IP "source /etc/profile && cd /export/deploy && python3 -m venv myenv && pip install -r requirements.txt && python app.py"
