@@ -9,4 +9,4 @@ deploy:
   script:
     - sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $CUSTOM_USERNAME@$CUSTOM_IP "mkdir -p /export/deploy"
     - sshpass -p "$PASSWORD" scp -r ./ $CUSTOM_USERNAME@$CUSTOM_IP:/export/deploy
-    - sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $CUSTOM_USERNAME@$CUSTOM_IP "source /etc/profile && cd /export/deploy && python3 -m venv myenv && pip install -r requirements.txt && sudo kill $(sudo lsof -t -i :5000) && nohup python app.py &"
+    - sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $CUSTOM_USERNAME@$CUSTOM_IP "source /etc/profile && cd /export/deploy && python3 -m venv myenv && pip install -r requirements.txt && sh ./kill5000.sh && nohup python app.py &"
