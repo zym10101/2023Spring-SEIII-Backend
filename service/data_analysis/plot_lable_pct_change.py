@@ -16,17 +16,17 @@ def plot_issue_pct_change_by_label(repo, start_time, end_time, labels=None):
         pos = get_issue_senti_pct_by_label(
             repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'pos')
         if pos == -1:
-            pos = 0
-            neg = 0
-            neu = 0
+            pos = 0.0
+            neg = 0.0
+            neu = 0.0
         else:
             neg = get_issue_senti_pct_by_label(
                 repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg')
             neu = 1 - pos - neg
 
-        pos_list.append(pos)
-        neg_list.append(neg)
-        neu_list.append(neu)
+        pos_list.append(round(pos, 4))
+        neg_list.append(round(neg, 4))
+        neu_list.append(round(neu, 4))
 
     return sort_data({
         "title": "issue的labels情绪文本占比图",
@@ -51,17 +51,17 @@ def plot_comment_pct_change_by_label(repo, start_time, end_time, labels=None):
         pos = get_comment_senti_pct_by_label(
             repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'pos')
         if pos == -1:
-            pos = 0
-            neg = 0
-            neu = 0
+            pos = 0.0
+            neg = 0.0
+            neu = 0.0
         else:
             neg = get_comment_senti_pct_by_label(
                 repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg')
             neu = 1 - pos - neg
 
-        pos_list.append(pos)
-        neg_list.append(neg)
-        neu_list.append(neu)
+        pos_list.append(round(pos, 4))
+        neg_list.append(round(neg, 4))
+        neu_list.append(round(neu, 4))
 
     return sort_data({
         "title": "comment的labels情绪文本占比图",
@@ -86,17 +86,17 @@ def plot_all_pct_change_by_label(repo, start_time, end_time, weighting, labels=N
         pos = get_all_senti_pct_by_label(
             repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'pos', weighting)
         if pos == -1:
-            pos = 0
-            neg = 0
-            neu = 0
+            pos = 0.0
+            neg = 0.0
+            neu = 0.0
         else:
             neg = get_all_senti_pct_by_label(
                 repo, label, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg', weighting)
             neu = 1 - pos - neg
 
-        pos_list.append(pos)
-        neg_list.append(neg)
-        neu_list.append(neu)
+        pos_list.append(round(pos, 4))
+        neg_list.append(round(neg, 4))
+        neu_list.append(round(neu, 4))
 
     return sort_data({
         "title": "issue+comment的labels情绪文本占比图",

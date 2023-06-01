@@ -18,16 +18,16 @@ def plot_user_issue_pct_change(repo_name, user, intervals):
         end_t = intervals[i + 1]
         pos = get_issue_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos')
         if pos == -1:
-            pos = 0
-            neg = 0
-            neu = 0
+            pos = 0.0
+            neg = 0.0
+            neu = 0.0
         else:
             neg = get_issue_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
             neu = 1 - pos - neg
 
-        pos_list.append(pos)
-        neg_list.append(neg)
-        neu_list.append(neu)
+        pos_list.append(round(pos, 4))
+        neg_list.append(round(neg, 4))
+        neu_list.append(round(neu, 4))
 
     return {"title": "用户issue情绪文本占比波动图",
             "data":{
@@ -55,16 +55,16 @@ def plot_user_comment_pct_change(repo_name, user, intervals):
         end_t = intervals[i + 1]
         pos = get_comment_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos')
         if pos == -1:
-            pos = 0
-            neg = 0
-            neu = 0
+            pos = 0.0
+            neg = 0.0
+            neu = 0.0
         else:
             neg = get_comment_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
             neu = 1 - pos - neg
 
-        pos_list.append(pos)
-        neg_list.append(neg)
-        neu_list.append(neu)
+        pos_list.append(round(pos, 4))
+        neg_list.append(round(neg, 4))
+        neu_list.append(round(neu, 4))
 
     return {"title": "用户comment情绪文本占比波动图",
             "data": {
@@ -92,16 +92,16 @@ def plot_user_all_pct_change(repo_name, user, intervals, weighting):
         end_t = intervals[i + 1]
         pos = get_all_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos', weighting)
         if pos == -1:
-            pos = 0
-            neg = 0
-            neu = 0
+            pos = 0.0
+            neg = 0.0
+            neu = 0.0
         else:
             neg = get_all_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg', weighting)
             neu = 1 - pos - neg
 
-        pos_list.append(pos)
-        neg_list.append(neg)
-        neu_list.append(neu)
+        pos_list.append(round(pos, 4))
+        neg_list.append(round(neg, 4))
+        neu_list.append(round(neu, 4))
 
     return {"title": "用户issue+comment情绪文本占比波动图",
             "data": {
