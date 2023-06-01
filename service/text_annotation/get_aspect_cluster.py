@@ -12,7 +12,7 @@ def addLineNo():
 
 
 def getSentiment():
-    with open('人工标注sentiment.txt', 'r', encoding='utf-8') as file:
+    with open('D:\大三下课程\软工三\iter3backend\service\\text_annotation\人工标注sentiment.txt', 'r', encoding='utf-8') as file:
         sentiment_result = []
         for line in file:
             sentiment_result.append(line.split()[0])
@@ -139,6 +139,7 @@ def getAspectCluster():
         json_objs = []
         senti_score = 0
         for key in aspect_table_lineNo:
+            senti_score = 0
             linNo_array = aspect_table_lineNo.get(key)
             for index in linNo_array:
                 senti_score += int(sentiment[index - 1])
@@ -149,7 +150,7 @@ def getAspectCluster():
             json_obj = {"name": key,
                         "value": [len(linNo_array), round(senti_score / len(linNo_array), 1)],
                         "context": context
-            }
+                        }
             json_objs.append(json_obj)
         # json_objs = []
         # for key in lineNo_sentiment:
@@ -160,9 +161,9 @@ def getAspectCluster():
         json_str = json.dumps(json_objs)
         print(json_str)
 
-        # for key, value in aspect_table_lineNo.items():
-        #     print(key, ':', value)
-        # print()
+        for key, value in aspect_table_lineNo.items():
+            print(key, ':', value)
+        print()
         # for key, value in aspect_table.items():
         #     print(key, ':', value)
         # print()
