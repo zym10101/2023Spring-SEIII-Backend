@@ -10,3 +10,5 @@ if [ -n "$process_ids" ]; then
 else
     echo "No processes found on port $port."
 fi
+
+nohup python app.py &
