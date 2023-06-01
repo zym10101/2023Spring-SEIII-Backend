@@ -685,7 +685,7 @@ def draw_all_pct_change_by_user():
     periods = data.get('periods', 8)
     user = str(data.get('user', ''))
     weighting = data.get('weighting', 0.7)
-    intervals = get_plot_intervals(start_time, end_time, freq, periods)
+    intervals = get_plot_intervals(start_time, end_time, freq, int(periods))
     weighting = float(weighting)
     return jsonify(plot_user_all_pct_change(repo_name, user, intervals, weighting))
 
@@ -702,7 +702,7 @@ def draw_issue_pct_change_by_user():
     freq = data.get('freq', None)
     periods = data.get('periods', 8)
     user = str(data.get('user', ''))
-    intervals = get_plot_intervals(start_time, end_time, freq, periods)
+    intervals = get_plot_intervals(start_time, end_time, freq, int(periods))
     return jsonify(plot_user_issue_pct_change(repo_name, user, intervals))
 
 
