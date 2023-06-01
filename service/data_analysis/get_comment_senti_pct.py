@@ -11,10 +11,12 @@ def get_comment_pct_by_time(repo_name, start_time, end_time, polarity):
     pos_count = 0
     neg_count = 0
     neutral_count = 0
+    count = 0
 
     for issue in issues:
         comments = issue.issue_comments
         for comment in comments:
+            count = count + 1
             result = int(comment.pos_body) + int(comment.neg_body)
             if result > 0:
                 pos_count = pos_count + 1
@@ -24,9 +26,9 @@ def get_comment_pct_by_time(repo_name, start_time, end_time, polarity):
                 neg_count = neg_count + 1
 
     if polarity == "pos":
-        return pos_count / len(issues)
+        return pos_count / count
     else:
-        return neg_count / len(issues)
+        return neg_count / count
 
 
 # 根据issue名获取单个issue的comment列表积极/消极情绪值占比
