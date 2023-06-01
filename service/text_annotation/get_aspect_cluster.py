@@ -3,7 +3,7 @@ import re
 
 
 def addLineNo():
-    with open('人工标注.txt', 'r', encoding='utf-8') as file:
+    with open('service/text_annotation/人工标注.txt', 'r', encoding='utf-8') as file:
         lines = file.readlines()
         file.seek(0)
         for index, line in enumerate(lines, start=1):
@@ -12,7 +12,7 @@ def addLineNo():
 
 
 def getSentiment():
-    with open('D:\大三下课程\软工三\iter3backend\service\\text_annotation\人工标注sentiment.txt', 'r', encoding='utf-8') as file:
+    with open('service/text_annotation/人工标注sentiment.txt', 'r', encoding='utf-8') as file:
         sentiment_result = []
         for line in file:
             sentiment_result.append(line.split()[0])
@@ -67,11 +67,11 @@ def getAspectCluster():
         'security': [],
         'date': []
     }
-    with open('人工标注.txt', 'r', encoding='utf-8') as file:
+    with open('service/text_annotation/人工标注.txt', 'r', encoding='utf-8') as file:
         for index, line in enumerate(file, start=1):
             text.append(line)
         # print(text)
-    with open('人工标注.txt', 'r', encoding='utf-8') as file:
+    with open('service/text_annotation/人工标注.txt', 'r', encoding='utf-8') as file:
         for index, line in enumerate(file, start=1):
             # 匹配符号"【"和"】"之间的任意字符，非贪婪模式
             pattern = r'【(.*?)】'
