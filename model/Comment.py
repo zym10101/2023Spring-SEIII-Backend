@@ -98,7 +98,7 @@ class Comment(db.Model):
             'html_url': self.html_url,
             'issue_url': self.issue_url,
             'node_id': self.node_id,
-            'user': self.user.to_dict(),
+            'user': self.user.to_dict() if self.user else None,
             'created_at': self.created_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'updated_at': self.updated_at.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'author_association': self.author_association,
