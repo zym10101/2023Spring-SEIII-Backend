@@ -564,9 +564,10 @@ def get_most_used_labels():
 
 # 请求：http://127.0.0.1:5000/analyse/line/all/label
 # issue+comment的labels情绪文本占比图
-@app.route("/analyse/line/all/label", methods=["GET"])
+@app.route("/analyse/line/all/label", methods=["POST"])
 def draw_all_pct_change_by_label():
-    data = request.args
+    # data = request.args
+    data = json.loads(request.data)
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -577,9 +578,10 @@ def draw_all_pct_change_by_label():
 
 # 请求：http://127.0.0.1:5000/analyse/line/issue/label
 # issue的labels情绪文本占比图
-@app.route("/analyse/line/issue/label", methods=["GET"])
+@app.route("/analyse/line/issue/label", methods=["POST"])
 def draw_issue_pct_change_by_label():
-    data = request.args
+    # data = request.args
+    data = json.loads(request.data)
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
@@ -589,9 +591,10 @@ def draw_issue_pct_change_by_label():
 
 # 请求：http://127.0.0.1:5000/analyse/line/comment/label
 # comment的labels情绪文本占比图
-@app.route("/analyse/line/comment/label", methods=["GET"])
+@app.route("/analyse/line/comment/label", methods=["POST"])
 def draw_comment_pct_change_by_label():
-    data = request.args
+    # data = request.args
+    data = json.loads(request.data)
     repo_name = str(data.get('repo_name', ''))
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))

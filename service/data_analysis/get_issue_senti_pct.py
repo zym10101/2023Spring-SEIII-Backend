@@ -4,7 +4,7 @@ from dao.IssueDao import get_by_create_time_all
 def get_issue_pct_by_time(repo_name, start_time, end_time, polarity):
     issues = get_by_create_time_all(repo_name, start_time, end_time)
     if len(issues) == 0:
-        return f"该时间段内，{repo_name} issue为空！"
+        return -1
     return get_issue_pct(issues, polarity)
 
 

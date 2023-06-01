@@ -24,14 +24,14 @@ def plot_repo_issue_pct_change(repo_name, start_time, end_time, intervals):
             start_t = intervals[i]
             end_t = intervals[i + 1]
             pos = get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos')
-            neg = get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
-            print(pos,neg)
-            # if not pos.isdigit() :
-            #     pos=0
-            #     neg=0
-            #     neu=0
-            # else:
-            neu = 1 - pos - neg
+            if pos == -1:
+                pos = 0
+                neg = 0
+                neu = 0
+            else:
+                neg = get_issue_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
+                neu = 1 - pos - neg
+
             pos_list.append(pos)
             neg_list.append(neg)
             neu_list.append(neu)
@@ -61,8 +61,14 @@ def plot_repo_comment_pct_change(repo_name, start_time, end_time, intervals):
             start_t = intervals[i]
             end_t = intervals[i + 1]
             pos = get_comment_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos')
-            neg = get_comment_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
-            neu = 1 - pos - neg
+            if pos == -1:
+                pos = 0
+                neg = 0
+                neu = 0
+            else:
+                neg = get_comment_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
+                neu = 1 - pos - neg
+
             pos_list.append(pos)
             neg_list.append(neg)
             neu_list.append(neu)
@@ -96,9 +102,15 @@ def plot_repo_all_pct_change(repo_name, start_time, end_time, intervals, weighti
             end_t = intervals[i + 1]
             pos = get_all_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos',
                                       weighting)
-            neg = get_all_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg',
+            if pos == -1:
+                pos = 0
+                neg = 0
+                neu = 0
+            else:
+                neg = get_all_pct_by_time(repo_name, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg',
                                       weighting)
-            neu = 1 - pos - neg
+                neu = 1 - pos - neg
+
             pos_list.append(pos)
             neg_list.append(neg)
             neu_list.append(neu)

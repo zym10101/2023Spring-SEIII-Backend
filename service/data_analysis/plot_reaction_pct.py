@@ -11,9 +11,15 @@ def plot_issue_reaction_pct(repo, start_time, end_time):
     for reaction in reactions:
         pos = get_issue_senti_pct_by_reaction(
             repo, reaction, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'pos')
-        neg = get_issue_senti_pct_by_reaction(
-            repo, reaction, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg')
-        neu = 1 - pos - neg
+        if pos == -1:
+            pos = 0
+            neg = 0
+            neu = 0
+        else:
+            neg = get_issue_senti_pct_by_reaction(
+                repo, reaction, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg')
+            neu = 1 - pos - neg
+
         pos_list.append(pos)
         neg_list.append(neg)
         neu_list.append(neu)
@@ -30,9 +36,15 @@ def plot_comment_reaction_pct(repo, start_time, end_time):
     for reaction in reactions:
         pos = get_comment_senti_pct_by_reaction(
             repo, reaction, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'pos')
-        neg = get_comment_senti_pct_by_reaction(
-            repo, reaction, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg')
-        neu = 1 - pos - neg
+        if pos == -1:
+            pos = 0
+            neg = 0
+            neu = 0
+        else:
+            neg = get_comment_senti_pct_by_reaction(
+                repo, reaction, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg')
+            neu = 1 - pos - neg
+
         pos_list.append(pos)
         neg_list.append(neg)
         neu_list.append(neu)
@@ -58,9 +70,15 @@ def plot_all_reaction_pct(repo, start_time, end_time, weighting):
     for reaction in reactions:
         pos = get_all_senti_pct_by_reaction(
             repo, reaction, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'pos', weighting)
-        neg = get_all_senti_pct_by_reaction(
-            repo, reaction, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg', weighting)
-        neu = 1 - pos - neg
+        if pos == -1:
+            pos = 0
+            neg = 0
+            neu = 0
+        else:
+            neg = get_all_senti_pct_by_reaction(
+                repo, reaction, convert_to_iso8601(start_time), convert_to_iso8601(end_time), 'neg', weighting)
+            neu = 1 - pos - neg
+
         pos_list.append(pos)
         neg_list.append(neg)
         neu_list.append(neu)
