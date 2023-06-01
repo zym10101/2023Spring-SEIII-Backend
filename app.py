@@ -460,6 +460,7 @@ def draw_all_pct():
     end_time = str(data.get('end_time', ''))
     weighting = data.get('weighting', 0.7)
     intervals = [start_time, end_time]
+    weighting = float(weighting)
     return jsonify(plot_repo_all_pct_change(repo_name, start_time, end_time, intervals, weighting))
 
 
@@ -505,6 +506,7 @@ def draw_all_pct_change():
     periods = data.get('periods', 8)
     weighting = data.get('weighting', 0.7)
     intervals = get_plot_intervals(start_time, end_time, freq, periods)
+    weighting = float(weighting)
     return jsonify(plot_repo_all_pct_change(repo_name, start_time, end_time, intervals, weighting))
 
 
@@ -572,6 +574,7 @@ def draw_all_pct_change_by_label():
     end_time = str(data.get('end_time', ''))
     weighting = data.get('weighting', 0.7)
     labels = data.get('labels', None)
+    weighting = float(weighting)
     return jsonify(plot_all_pct_change_by_label(repo_name, start_time, end_time, weighting, labels))
 
 
@@ -608,6 +611,7 @@ def draw_all_pct_change_by_reaction():
     start_time = str(data.get('start_time', ''))
     end_time = str(data.get('end_time', ''))
     weighting = data.get('weighting', 0.7)
+    weighting = float(weighting)
     return plot_all_reaction_pct(repo_name, start_time, end_time, weighting)
 
 
@@ -682,6 +686,7 @@ def draw_all_pct_change_by_user():
     user = str(data.get('user', ''))
     weighting = data.get('weighting', 0.7)
     intervals = get_plot_intervals(start_time, end_time, freq, periods)
+    weighting = float(weighting)
     return jsonify(plot_user_all_pct_change(repo_name, user, intervals, weighting))
 
 
