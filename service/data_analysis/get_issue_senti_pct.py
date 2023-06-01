@@ -26,6 +26,6 @@ def get_issue_pct(issues, polarity):
             neg_count = neg_count + 1
 
     if polarity == "pos":
-        return pos_count / len(issues)
-    else:
-        return neg_count / len(issues)
+        return round(pos_count / len(issues), 2)
+    elif polarity == "neg":
+        return round(neg_count / len(issues), 2)

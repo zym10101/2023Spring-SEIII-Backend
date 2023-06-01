@@ -28,9 +28,9 @@ def get_all_pct_by_time(repo_name, start_time, end_time, polarity, weighting):
             neg_count = neg_count + 1
 
     if polarity == "pos":
-        return pos_count / count
+        return round(pos_count / count, 2)
     elif polarity == "neg":
-        return neg_count / count
+        return round(neg_count / count, 2)
 
 
 def get_all_pct(issues, polarity, weighting):
@@ -58,6 +58,6 @@ def get_all_pct(issues, polarity, weighting):
             neg_count = neg_count + 1
 
     if polarity == "pos":
-        return pos_count / count
+        return round(pos_count / count, 2)
     elif polarity == "neg":
-        return neg_count / count
+        return round(neg_count / count, 2)
