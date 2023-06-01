@@ -24,7 +24,15 @@ def plot_issue_reaction_pct(repo, start_time, end_time):
         neg_list.append(neg)
         neu_list.append(neu)
 
-    return [reactions, pos_list, neu_list, neg_list, 'reactions']
+    return {"title": "comment的reaction情绪文本占比图",
+            "data": {
+                "pos": pos_list,
+                "neg": neg_list,
+                "neu": neu_list,
+                "xAxis": reactions
+            },
+
+            }
     # return [reactions, pos_list, neu_list, neg_list, 'issue的reaction情绪文本占比图', 'reactions']
 
 
