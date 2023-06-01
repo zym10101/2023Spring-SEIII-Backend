@@ -33,6 +33,7 @@ from service.data_analysis.plot_user_pct_change import plot_user_comment_pct_cha
 from service.scraper.GitHubScraper import GitHubScraper
 from service.scraper.Params import Params
 from utils.Email import send_crawling_completed
+from service.text_annotation.get_aspect_cluster import getAspectCluster
 
 # tmp
 from dao import IssueDao
@@ -713,6 +714,12 @@ def draw_comment_pct_change_by_user():
     intervals = [start_time, end_time]
     return jsonify(plot_user_comment_pct_change(repo_name, user, intervals))
 
+
+# 请求：http://127.0.0.1:5000/annotation
+# 根据人工标注结果聚焦版本问题
+@app.route("/annotation", methods=["GET"])
+def get_aspect_cluster():
+    return jsonify(getAspectCluster())
 
 # # 请求：http://127.0.0.1:5000/get-and-save-db
 # # 在爬取issue的同时完成对响应comments的爬取
