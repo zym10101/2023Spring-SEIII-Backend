@@ -17,8 +17,14 @@ def plot_user_issue_pct_change(repo_name, user, intervals):
         start_t = intervals[i]
         end_t = intervals[i + 1]
         pos = get_issue_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos')
-        neg = get_issue_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
-        neu = 1 - pos - neg
+        if pos == -1:
+            pos = 0
+            neg = 0
+            neu = 0
+        else:
+            neg = get_issue_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
+            neu = 1 - pos - neg
+
         pos_list.append(pos)
         neg_list.append(neg)
         neu_list.append(neu)
@@ -48,8 +54,14 @@ def plot_user_comment_pct_change(repo_name, user, intervals):
         start_t = intervals[i]
         end_t = intervals[i + 1]
         pos = get_comment_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos')
-        neg = get_comment_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
-        neu = 1 - pos - neg
+        if pos == -1:
+            pos = 0
+            neg = 0
+            neu = 0
+        else:
+            neg = get_comment_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg')
+            neu = 1 - pos - neg
+
         pos_list.append(pos)
         neg_list.append(neg)
         neu_list.append(neu)
@@ -79,8 +91,14 @@ def plot_user_all_pct_change(repo_name, user, intervals, weighting):
         start_t = intervals[i]
         end_t = intervals[i + 1]
         pos = get_all_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'pos', weighting)
-        neg = get_all_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg', weighting)
-        neu = 1 - pos - neg
+        if pos == -1:
+            pos = 0
+            neg = 0
+            neu = 0
+        else:
+            neg = get_all_senti_pct_by_user(repo_name, user, convert_to_iso8601(start_t), convert_to_iso8601(end_t), 'neg', weighting)
+            neu = 1 - pos - neg
+
         pos_list.append(pos)
         neg_list.append(neg)
         neu_list.append(neu)
