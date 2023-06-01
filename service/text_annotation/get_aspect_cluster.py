@@ -142,7 +142,7 @@ def getAspectCluster():
             for index in linNo_array:
                 senti_score += int(sentiment[index - 1])
             context = aspect_table[key]
-            lineNo_sentiment[key] = {'lineNo': linNo_array, 'sentiment': round(senti_score / len(linNo_array), 1),
+            lineNo_sentiment[key] = {'lineNo': linNo_array, 'NumOfSentence': len(linNo_array), 'sentiment': round(senti_score / len(linNo_array), 1),
                                      'context': context}
         json_objs = []
         for key in lineNo_sentiment:
