@@ -5,6 +5,7 @@ import jpype
 from dotenv import load_dotenv
 import concurrent.futures
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import threading
 
 # 导入dao层相关内容
@@ -50,6 +51,7 @@ from utils.get_plot_intervals import get_plot_intervals
 # 1. 以后出现bug可以帮助快速定位
 # 2. 对于寻找模板文件有一个相对路径
 app = Flask(__name__)
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] \
     = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOSTNAME}:{DB_PORT}/{DB_DATABASE}?charset=utf8mb4"
 
