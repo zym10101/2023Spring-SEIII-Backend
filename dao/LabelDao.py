@@ -12,6 +12,8 @@ def get_labels(repo_name, begin_time, end_time):
         .all()]
     labels = list(set(element for sublist in labels_list for element in sublist))
     label_id = [label.id for label in labels]
+    if len(label_id)==0:
+        return []
     labels = Label.query.filter(or_(*[Label.id == id for id in label_id])).with_entities(Label.name).all()
     label_names = list(set([label.name for label in labels]))
     return label_names
