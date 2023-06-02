@@ -1,5 +1,6 @@
 stages:
   - deploy
+  - release
 
 deploy:
   stage: deploy
@@ -10,3 +11,17 @@ deploy:
     - sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $CUSTOM_USERNAME@$CUSTOM_IP "mkdir -p /export/deploy"
     - sshpass -p "$PASSWORD" scp -r ./ $CUSTOM_USERNAME@$CUSTOM_IP:/export/deploy
     - sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $CUSTOM_USERNAME@$CUSTOM_IP "source /etc/profile && cd /export/deploy && python3 -m venv myenv && pip install -r requirements.txt && sh ./run.sh"
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - echo "running release_job for iter3"
+  release:
+    tag_name: 'v0.$CI_PIPELINE_IID'
+    description: 'v0.$CI_PIPELINE_IID'
+    ref: '$CI_COMMIT_SHA'
